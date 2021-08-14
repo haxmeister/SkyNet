@@ -1,0 +1,10 @@
+!#/usr/bin/env perl
+
+use strict;
+use warnings;
+
+my $server = SkyNet::Server->new(
+    'port'  => 9765,
+    'debug' => '1',
+
+);
