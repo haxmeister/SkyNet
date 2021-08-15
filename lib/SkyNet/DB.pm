@@ -14,12 +14,7 @@ sub new {
         'dsn'         => 'dbi:mysql:SkyNet',
     }, $package;
 
-    $self->{'db'} = DBI->connect(
-        $self->{dsn},
-        $self->{db_username},
-        $self->{db_password},
-        { RaiseError => 1, AutoCommit => 0 },
-    ) or print STDERR $DBI::errstr;
+    $self->{'db'} = DBI->connect( $self->{dsn}, $self->{db_username}, $self->{db_password}, { RaiseError => 1, AutoCommit => 0 }, ) or print STDERR $DBI::errstr;
 
     return $self;
 }
@@ -45,5 +40,6 @@ sub confirm_login {
 }
 
 1;
+
 
 

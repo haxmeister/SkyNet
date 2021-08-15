@@ -9,9 +9,8 @@ use JSON;
 use SkyNet::User;
 use SkyNet::Dispatcher;
 
-
-my $mux      = IO::Multiplex->new();
-my $socket   = undef;
+my $mux    = IO::Multiplex->new();
+my $socket = undef;
 
 sub new {
     my ( $class, $args ) = @_;
@@ -20,13 +19,16 @@ sub new {
         'port'     => $args->{port},
         'debug'    => $args->{debug},
         'dispatch' => undef,
-        'json' => JSON->new->allow_nonref,
+        'json'     => JSON->new->allow_nonref,
     }, $class;
 
-    $self->{dispatch} = SkyNet::Dispatcher->new({
-        'debug' => $args->{debug},
-        #'server'=> $self,
-    });
+    $self->{dispatch} = SkyNet::Dispatcher->new(
+        {
+            'debug' => $args->{debug},
+
+            #'server'=> $self,
+        }
+    );
     $self->{dispatch}->{'server'} = $self;
 
     return $self;
@@ -48,7 +50,7 @@ sub start {
 
     # We use the listen method instead of the add method.
     $mux->listen($socket);
-    $mux->set_callback_object($self);#__PACKAGE__);
+    $mux->set_callback_object($self);    #__PACKAGE__);
     $mux->loop;
 }
 
@@ -59,14 +61,14 @@ sub mux_connection {
     my $fh   = shift;
 
     # Construct a new User object
-    SkyNet::User->new({
-        'mux' => $mux,
-        'fh'  => $fh,
-        'server' => $self,
-    });
+    SkyNet::User->new(
+        {
+            'mux'    => $mux,
+            'fh'     => $fh,
+            'server' => $self,
+        }
+    );
 }
-
-
 
 ## accepts a string and outputs it to STDERR with nice colored format
 ## and a time stamp

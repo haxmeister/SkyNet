@@ -7,24 +7,24 @@ my %users = ();
 
 sub new {
     my $package = shift;
-    my $args = shift;
+    my $args    = shift;
 
-    my $self    = bless {
-            'mux'     => $args->{mux},
-            'fh'      => $args->{fh},
-            'server'  => $args->{server},
-            'name'    => '',
-            'allowed' => {
-                'seespots' => 1,    # can see spots
-                'seechat'  => 1,    # can see alliance chat
-                'manuser'  => 0,    # can add/remove users
-                'manwarr'  => 0,    # can add/remove warranty time
-                'manstat'  => 0,    # can change kos, ally, status
-                'seestat'  => 0,    # can see kos, ally, status
-                'seewarr'  => 0,    # can see active warranties
-                'addbot'   => 0,    # can add a bot user
-            },
-        }, $package;
+    my $self = bless {
+        'mux'     => $args->{mux},
+        'fh'      => $args->{fh},
+        'server'  => $args->{server},
+        'name'    => '',
+        'allowed' => {
+            'seespots' => 1,    # can see spots
+            'seechat'  => 1,    # can see alliance chat
+            'manuser'  => 0,    # can add/remove users
+            'manwarr'  => 0,    # can add/remove warranty time
+            'manstat'  => 0,    # can change kos, ally, status
+            'seestat'  => 0,    # can see kos, ally, status
+            'seewarr'  => 0,    # can see active warranties
+            'addbot'   => 0,    # can add a bot user
+        },
+    }, $package;
 
     # Register the new User object as the callback specifically for
     # this file handle.
@@ -36,6 +36,7 @@ sub new {
 
     # Register this User object in the main list of Users
     $users{$self} = $self;
+
     #$self->{mux}->set_timeout( $self->{fh}, 1 );
 }
 
@@ -63,11 +64,11 @@ sub mux_close {
 
 # This gets called every second to update User info, etc...
 #sub mux_timeout {
-    #my $self = shift;
-    #my $mux  = shift;
+#my $self = shift;
+#my $mux  = shift;
 
-    #$self->heartbeat;
-    #$self->mux->set_timeout( $self->{fh}, 1 );
+#$self->heartbeat;
+#$self->mux->set_timeout( $self->{fh}, 1 );
 #}
 
 sub process_command {
@@ -82,8 +83,9 @@ sub process_command {
     $action = $data->{action};
     if ( $self->{server}->{dispatch}->can($action) ) {
         $self->{server}->{dispatch}->$action( $data, $self );
-    }else{
-        print STDERR "\n\n".$self->{server}->{json}->encode($data)."\n\n";
+    }
+    else {
+        print STDERR "\n\n" . $self->{server}->{json}->encode($data) . "\n\n";
     }
 }
 
@@ -100,7 +102,7 @@ sub send_chat_message {
 }
 
 sub send_playerseen {
-    my $self = shift;
+    my $self    = shift;
     my $msgData = shift;
 
     if ( $self->{'allowed'}{'seespots'} ) {
@@ -108,7 +110,6 @@ sub send_playerseen {
         $self->{mux}->write( $self->{fh}, "$msgStr\r\n" );
     }
 }
-
 
 1;
 
