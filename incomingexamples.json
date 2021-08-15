@@ -1,0 +1,65 @@
+{
+    "playerlist": [
+        {
+            "faction": 3,
+            "health": 100,
+            "t": 1,
+            "sectorid": 4764,
+            "fitani": 22712,
+            "name": "Pptdriver2",
+            "reporter": "SilverAce",
+            "reporterguild": "",
+            "guildtag": "",
+            "shipname": "Trident Type M",
+            "reporterfaction": 3,
+            "flocal": 65102,
+            "fuit": 65102,
+            "reporterhealth": 100,
+            "fserco": 42824
+        },
+        {
+            "sectorid": 4764,
+            "t": 0,
+            "health": 100,
+            "faction": 3,
+            "reporter": "SilverAce",
+            "name": "Pptdriver2",
+            "fitani": 22712,
+            "reporterfaction": 3,
+            "shipname": "Trident Type M",
+            "guildtag": "TRI",
+            "reporterguild": "",
+            "reporterhealth": 100,
+            "fserco": 42824,
+            "fuit": 65102,
+            "flocal": 65102
+        }
+    ],
+    "action": "playerseen"
+}
+
+{
+    "action": "auth",
+    "password": "bananafire35",
+    "username": "Munny",
+    "idstring": "93321253741944961"
+}
+
+
+{
+    "action": "channel",
+    "playerlist": [
+        {
+            "t": 1,
+            "factioncolor": "c0c000",
+            "msg": [
+                "hello",
+                "world"
+            ],
+            "sector": "Dau L-10",
+            "player": "SilverAce"
+        }
+    ]
+}
+
+

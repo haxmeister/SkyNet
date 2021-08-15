@@ -1,10 +1,14 @@
-!#/usr/bin/env perl
+#!/usr/bin/env perl
 
 use strict;
 use warnings;
+use FindBin;
+use lib "$FindBin::Bin/lib";
+use SkyNet::Server;
 
-my $server = SkyNet::Server->new(
+my $server = SkyNet::Server->new({
     'port'  => 9765,
-    'debug' => '1',
-
-);
+    'debug' => 1,
+});
+#$server->log_this("SkyNet activated..");
+$server->start();
