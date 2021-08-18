@@ -4,54 +4,50 @@ use strict;
 use warnings;
 use IO::Socket;
 use IO::Multiplex;
-use Term::ANSIColor;
-use JSON;
 use SkyNet::User;
-use SkyNet::Dispatcher;
-
-my $mux    = IO::Multiplex->new();
-my $socket = undef;
+use SkyNet::RPC;
 
 sub new {
-    my ( $class, $args ) = @_;
-
-    my $self = bless {
-        'port'     => $args->{port},
-        'debug'    => $args->{debug},
-        'dispatch' => undef,
-        'json'     => JSON->new->allow_nonref,
-    }, $class;
-
-    $self->{dispatch} = SkyNet::Dispatcher->new(
-        {
-            'debug' => $args->{debug},
-
-            #'server'=> $self,
-        }
-    );
-    $self->{dispatch}->{'server'} = $self;
-
+    my $class = shift;
+    my %args  = @_;
+    my $self  = {
+        'mux' => IO::Multiplex->new(),
+        'db'  => SkyNet::DB->new(
+                   'username' => $args{db_username},
+                   'password' => $args{db_password},
+                ),
+    };
+    $self->{'rpc'} = SkyNet::RPC->new('db' => $self->{db});
+    $self->{'db'}->db_connect();
+    bless $self, $class;
     return $self;
 }
 
-sub start {
+sub listen_on_port{
     my $self = shift;
-
-    $socket = IO::Socket::INET->new(
+    my $port = shift;
+    my $socket = IO::Socket::INET->new(
         Listen    => 5,
         LocalAddr => '0.0.0.0',
-        LocalPort => $self->{'port'},
+        LocalPort => $port,
         Proto     => 'tcp',
         ReusePort => 1,
         Blocking  => 0,
     ) || die "cannot create socket $!";
+    print "Listening on port $port..\n";
+    # setup multiplexer to watch server socket for events
+    $self->{mux}->listen($socket);
 
-    $self->log_this("Awaiting connections on port $self->{port}");
+    # set this package as a place to look for mux callbacks
+    $self->{mux}->set_callback_object($self);
 
-    # We use the listen method instead of the add method.
-    $mux->listen($socket);
-    $mux->set_callback_object($self);    #__PACKAGE__);
-    $mux->loop;
+
+}
+
+sub loop{
+    my $self = shift;
+    #start select loop
+    $self->{mux}->loop;
 }
 
 # mux_connection is called when a new connection is accepted.
@@ -62,14 +58,12 @@ sub mux_connection {
 
     # Construct a new User object
     SkyNet::User->new(
-        {
             'mux'    => $mux,
             'fh'     => $fh,
-            'server' => $self,
-        }
+            'rpc'    => $self->{rpc},
+            'db'     => $self->{db},
     );
 }
-
 ## accepts a string and outputs it to STDERR with nice colored format
 ## and a time stamp
 sub log_this {
@@ -91,4 +85,6 @@ sub timestamp {
     $year = $year + 1900;
     return "[$month/$mday/$year $hour:$min:$sec]";
 }
+
+1;
 1;

@@ -1,3 +1,14 @@
+/voce list
+{"action":"getlist","type":-1}
+
+/voce listkos
+{"action":"getlist","type":1}
+
+targetting player goli turret
+{"action":"playerstatus","name":"Small Turret (dethtag)"}
+targetting player
+{"action":"playerstatus","name":"dethtag"}
+
 {
     "playerlist": [
         {
