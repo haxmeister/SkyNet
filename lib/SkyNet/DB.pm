@@ -29,22 +29,6 @@ sub db_connect{
     ) or die "cannot connect to database".$DBI::errstr;
 }
 
-sub add_user {
-    my $self = shift;
-}
-
-sub remove_user {
-    my $self = shift;
-}
-
-sub change_perms {
-    my $self = shift;
-}
-
-sub get_user {
-    my $self = shift;
-}
-
 # returns an array ref
 sub authenticate_user {
     my $self = shift;
@@ -72,14 +56,7 @@ sub query{
     return \@data;
 }
 
-sub db_row_to_hash{
-    my $self = shift;
-    my $row = shift;
 
-    foreach my $column ($row){
-
-    }
-}
 ## accepts a string and outputs it to STDERR with nice colored format
 ## and a time stamp
 sub log_this {
@@ -102,7 +79,6 @@ sub timestamp {
     return "[$month/$mday/$year $hour:$min:$sec]";
 }
 
-1;
 1;
 
 

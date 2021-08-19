@@ -5,20 +5,7 @@ use warnings;
 use JSON;
 use Data::Dumper;
 
-my $server;
-my $db;
-
-sub new {
-    my $class = shift;
-    my %args = @_;
-    my $self  = bless {
-        'db' => $args{'db'},
-    }, $class;
-    return $self;
-}
-
 sub playerseen {
-    my $self   = shift;
     my $data   = shift;
     my $sender = shift;
 
@@ -29,58 +16,68 @@ sub playerseen {
     # send data to all permissioned users
     $data->{result} = 1;
     foreach my $user ( SkyNet::User::users() ) {
-        $user->send_playerseen($data);    #unless $user eq $this_user;
+        if ($user->{allowed}{seespots}){
+            my $msg = encode_json($data);
+            my $fh = $sender->{fh};
+            print $fh "$msg\r\n" unless $user eq $sender;
+        }
     }
 }
 
 sub channel {
-    my $self   = shift;
     my $data   = shift;
     my $sender = shift;
     $data->{result} = 1;
 
     foreach my $user ( SkyNet::User::users() ) {
-        $user->send_chat_message($data) unless $user eq $sender;
+        if ($user->{allowed}{seechat}){
+            my $msg = encode_json($data);
+            my $fh  = $sender->{fh};
+            print $fh "$msg\r\n" unless $user eq $sender;
+        }
     }
 }
 
 sub auth {
-    my $self   = shift;
     my $data   = shift;
-    my $user   = shift;
-    print Dumper $data;
-    print $data->{password}."\n";
-    my $results = $self->{db}->authenticate_user(
+    my $sender = shift;
+
+    my $results = $sender->{db}->authenticate_user(
                     $data->{username},
                     $data->{password}
                   );
 
     if ($results){
         print STDERR $data->{username}." has logged in\n";
+
+        # respond to user client that the auth was successful
         my $msg = '{"action":"auth","result":1}';
-        my $fh  = $user->{fh};
-        print $fh ( $msg . "\r\n" );
+        my $fh  = $sender->{fh};
+        print $fh "$msg\r\n";
+
+        # Set permissions to match the database results (from first match)
         foreach my $key (keys %{$results->[0]}){
-            if (exists $user->{allowed}{$key}){
-                $user->{allowed}{$key} = $results->[0]{$key};
+            if (exists $sender->{allowed}{$key}){
+                $sender->{allowed}{$key} = $results->[0]{$key};
             }
         }
     }else{
-        print STDERR "failed login..\n";
+
+        print STDERR "failed login attempt ".encode_json($data)."\n";
         my $msg = '{"action":"auth","result":0,}';
-        my $fh  = $user->{fh};
+        my $fh  = $sender->{fh};
         print $fh ( $msg . "\r\n" );
     }
-    print Dumper $user->{allowed};
+    print Dumper $sender->{allowed};
     #
 }
 
 sub logout {
-    my $self      = shift;
-    my $data      = shift;
-    my $this_user = shift;
+    my $data   = shift;
+    my $sender = shift;
     print STDERR "logout: " . encode_json($data)."\n";
 }
+
 ## accepts a string and outputs it to STDERR with nice colored format
 ## and a time stamp
 sub log_this {

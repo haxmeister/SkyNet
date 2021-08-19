@@ -15,9 +15,8 @@ sub new {
         'db'  => SkyNet::DB->new(
                    'username' => $args{db_username},
                    'password' => $args{db_password},
-                ),
+                 ),
     };
-    $self->{'rpc'} = SkyNet::RPC->new('db' => $self->{db});
     $self->{'db'}->db_connect();
     bless $self, $class;
     return $self;
@@ -40,8 +39,6 @@ sub listen_on_port{
 
     # set this package as a place to look for mux callbacks
     $self->{mux}->set_callback_object($self);
-
-
 }
 
 sub loop{
@@ -60,7 +57,6 @@ sub mux_connection {
     SkyNet::User->new(
             'mux'    => $mux,
             'fh'     => $fh,
-            'rpc'    => $self->{rpc},
             'db'     => $self->{db},
     );
 }
@@ -86,5 +82,4 @@ sub timestamp {
     return "[$month/$mday/$year $hour:$min:$sec]";
 }
 
-1;
 1;

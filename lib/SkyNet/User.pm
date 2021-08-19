@@ -3,6 +3,7 @@ package SkyNet::User;
 use strict;
 use warnings;
 use JSON;
+use SkyNet::RPC;
 my %users = ();
 
 sub new {
@@ -53,7 +54,6 @@ sub mux_close {
     my $self = shift;
 
     # User disconnected;
-    # [Notify other Users or something...]
     print STDERR  "User ".$self->{name}." disconnected..\n";
     delete $users{$self};
 }
@@ -61,46 +61,29 @@ sub mux_close {
 sub process_command {
     my $self = shift;
     my $cmd  = shift;
-    my $data;
-    my $action;
 
     print STDERR $cmd."received \n";
-    $data = decode_json($cmd);
-    print STDERR "eval ok\n";
-    return unless defined( $data->{action} );
-    print STDERR "action defined ok\n";
-    $action = $data->{action};
-    if ( $self->{rpc}->can($action) ) {
-        $self->{rpc}->$action( $data, $self );
-    }
-    else{
-        print STDERR "\n\n" . encode_json($data) . "\n\n";
-    }
-}
 
-# recieves a hashref that is a chat message action and
-# sends it to the user if they have permissions to see it
-sub send_chat_message {
-    my $self    = shift;
-    my $msgData = shift;
-    my $fh      = $self->{fh};
+    # attempt to successfully decode the json
+    my $data;
+    if ( eval{$data = decode_json($cmd);1;} ){
 
-    if ( $self->{'allowed'}{'seechat'} ) {
-        my $msgStr = encode_json($msgData);
-        print $fh "$msgStr\r\n";
+        # if there's no action in the message then drop it and move on
+        return unless defined( $data->{action} );
+
+        # look for rpc by the same name as action field
+        my $action = $data->{action};
+        if ( SkyNet::RPC->can($action) ) {
+            print STDERR "$action ..found\n";
+            SkyNet::RPC::->$action( $data, $self );
+        }
+        else{
+            # actions with no rpc get the json dumped to stderr
+            print STDERR "\n\n" . encode_json($data) . "\n\n";
+        }
     }
 }
 
-sub send_playerseen {
-    my $self    = shift;
-    my $msgData = shift;
-    my $fh      = $self->{fh};
-
-    if ( $self->{'allowed'}{'seespots'} ) {
-        my $msgStr = encode_json($msgData);
-        print $fh "$msgStr\r\n";
-    }
-}
 ## accepts a string and outputs it to STDERR with nice colored format
 ## and a time stamp
 sub log_this {
@@ -114,7 +97,6 @@ sub log_this {
 }
 
 sub timestamp {
-    my $self   = shift;
     my @months = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
     my @days   = qw(Sun Mon Tue Wed Thu Fri Sat Sun);
     my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = localtime();
@@ -123,6 +105,5 @@ sub timestamp {
     return "[$month/$mday/$year $hour:$min:$sec]";
 }
 
-1;
 1;
 
