@@ -101,4 +101,3 @@ sub timestamp {
 }
 
 1;
-1;
