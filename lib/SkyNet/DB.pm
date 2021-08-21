@@ -41,6 +41,16 @@ sub authenticate_user {
     return $data;
 }
 
+sub insert{
+    my $self = shift;
+    my $sql  = shift;
+    print "$sql\n";
+    my $sth = $self->{dbh}->prepare($sql);
+    $sth->execute();
+    $sth->finish();
+    $self->{dbh}->commit or print STDERR "insert failed ".$DBI::errstr;
+}
+
 # returns an array of results
 sub query{
     my $self = shift;

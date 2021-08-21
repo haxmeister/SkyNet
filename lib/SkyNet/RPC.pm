@@ -6,11 +6,24 @@ use JSON;
 use Data::Dumper;
 
 sub playerseen {
+    my $caller = shift;
     my $data   = shift;
     my $sender = shift;
 
     foreach my $player ( @{ $data->{playerlist} } ) {
-        print STDERR "Seen: [$player->{guildtag}] $player->{name} in $player->{shipname}\n";
+        $player->{shipname} = $player->{shipname} || "station";
+        print STDERR "Seen: [$player->{guildtag}] $player->{name} in $player->{shipname} at $player->{sectorid}\n";
+        my $sql ="INSERT INTO seen (guildtag, name, sectorid, shipname, reporter) VALUES (?,?,?,?,?)";
+        my $sth = $sender->{db}->prepare($sql);
+            $sth->execute(
+                $player->{guildtag},
+                $player->{name},
+                $player->{sectorid},
+                $player->{shipname},
+                $player->{reporter},
+            );
+            $sth->finish();
+            $sender->{db}->commit or print STDERR $DBI::errstr;
     }
 
     # send data to all permissioned users
@@ -25,6 +38,7 @@ sub playerseen {
 }
 
 sub channel {
+    my $caller = shift;
     my $data   = shift;
     my $sender = shift;
     $data->{result} = 1;
@@ -39,15 +53,20 @@ sub channel {
 }
 
 sub auth {
+    my $caller = shift;
     my $data   = shift;
     my $sender = shift;
+    my @result_list;
+    my $sql = "SELECT * from users where username = ? and password = ?";
+    my $sth = $sender->{db}->prepare($sql);
+    $sth->execute($data->{username}, $data->{password});
 
-    my $results = $sender->{db}->authenticate_user(
-                    $data->{username},
-                    $data->{password}
-                  );
+    while(my $row = $sth->fetchrow_hashref()){
+        push(@result_list, $row);
+    }
+    $sth->finish();
 
-    if ($results){
+    if (@result_list){
         print STDERR $data->{username}." has logged in\n";
 
         # respond to user client that the auth was successful
@@ -56,9 +75,9 @@ sub auth {
         print $fh "$msg\r\n";
 
         # Set permissions to match the database results (from first match)
-        foreach my $key (keys %{$results->[0]}){
+        foreach my $key (keys %{$result_list[0]}){
             if (exists $sender->{allowed}{$key}){
-                $sender->{allowed}{$key} = $results->[0]{$key};
+                $sender->{allowed}{$key} = $result_list[0]{$key};
             }
         }
     }else{
@@ -68,36 +87,59 @@ sub auth {
         my $fh  = $sender->{fh};
         print $fh ( $msg . "\r\n" );
     }
-    print Dumper $sender->{allowed};
-    #
+}
+
+sub adduser{
+    # {"username":"Munny","password":"bananafire35","action":"adduser"}
+    my $caller = shift;
+    my $data   = shift;
+    my $sender = shift;
+    my $sql;
+    my $msg;
+
+    if ($sender->{allowed}{manuser}){
+        # check if user is already present
+        $sql = "select * from users where username='".$data->{username}."'";
+        my $sth = $sender->{db}->prepare($sql);
+        $sth->execute();
+        if (my $row = $sth->fetchrow_hashref()){
+            $msg = '{"action":"adduser","result":0,"error":"User already exists"}';
+            print STDERR "user already exists\n sending: $msg\n";
+            print {$sender->{fh}} $msg."\r\n";
+            $sth->finish();
+            return;
+        }
+
+        $sth->finish();
+
+        $sql = "INSERT INTO users (username, password, seespots, seechat, manuser, manwarr, manstat, seestat, seewarr, addbot) VALUES(?,?,?,?,?,?,?,?,?,?)";
+        $sth = $sender->{db}->prepare($sql);
+        $sth->execute(
+                $data->{username},
+                $data->{password},
+                1, #seespots
+                1, #see chat
+                0, #manage users
+                1, # manage warranties
+                0, # manage statuses
+                1, # see statuses
+                1, # see warranties
+                0 # add bots
+            );
+            $sth->finish();
+            $sender->{db}->commit or print STDERR $DBI::errstr;
+    }else{
+        my $msg = '{"action":"adduser","result":0,"msg":"Not authorized to manage users"}';
+        print {$sender->{fh}} $msg;
+    }
 }
 
 sub logout {
+    my $caller = shift;
     my $data   = shift;
     my $sender = shift;
     print STDERR "logout: " . encode_json($data)."\n";
 }
 
-## accepts a string and outputs it to STDERR with nice colored format
-## and a time stamp
-sub log_this {
-    my $self = shift;
-    my $line = shift;
-    print color('grey10');
-    print STDERR $self->timestamp();
-    print color('white');
-    print " $line \n";
-    print color('reset');
-}
-
-sub timestamp {
-    my $self   = shift;
-    my @months = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
-    my @days   = qw(Sun Mon Tue Wed Thu Fri Sat Sun);
-    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = localtime();
-    my $month = $mon + 1;
-    $year = $year + 1900;
-    return "[$month/$mday/$year $hour:$min:$sec]";
-}
 
 1;

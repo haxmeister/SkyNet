@@ -13,7 +13,6 @@ sub new {
     my $self = bless {
         'mux'     => $args{mux},
         'fh'      => $args{fh},
-        'rpc'     => $args{rpc},
         'db'      => $args{db},
         'name'    => '',
         'allowed' => {

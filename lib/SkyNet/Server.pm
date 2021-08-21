@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use IO::Socket;
 use IO::Multiplex;
+use DBI;
 use SkyNet::User;
 use SkyNet::RPC;
 
@@ -12,12 +13,15 @@ sub new {
     my %args  = @_;
     my $self  = {
         'mux' => IO::Multiplex->new(),
-        'db'  => SkyNet::DB->new(
-                   'username' => $args{db_username},
-                   'password' => $args{db_password},
-                 ),
     };
-    $self->{'db'}->db_connect();
+
+    $self->{db} = DBI->connect(
+        'dbi:mysql:skynet',
+        $args{db_username},
+        $args{db_password},
+        { RaiseError => 1, AutoCommit => 0 },
+    ) or die $DBI::errstr;
+
     bless $self, $class;
     return $self;
 }
