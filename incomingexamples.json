@@ -4,6 +4,10 @@
 /voce listkos
 {"action":"getlist","type":1}
 
+/voce addkos
+{"addedby":"Westacular.","length":"","notes":"no reason given","action":"addkos","name":"GARADEXX"}
+
+
 targetting player goli turret
 {"action":"playerstatus","name":"Small Turret (dethtag)"}
 targetting player
@@ -73,4 +77,9 @@ targetting player
     ]
 }
 
+adduser
+{"username":"Munny","password":"bananafire35","action":"adduser"}
+
+addpayment
+{"name":"Munny","action":"addpayment","length":"24h"}
 
