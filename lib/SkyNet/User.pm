@@ -15,6 +15,7 @@ sub new {
         'fh'      => $args{fh},
         'db'      => $args{db},
         'name'    => '',
+        'loggedIn'=> 0,
         'allowed' => {
             'seespots' => 0,    # can see spots
             'seechat'  => 0,    # can see alliance chat
@@ -38,6 +39,7 @@ sub new {
 
 sub users { return values %users; }
 
+# message received
 sub mux_input {
     my $self = shift;
     shift;    # mux not needed
@@ -80,6 +82,31 @@ sub process_command {
             # actions with no rpc get the json dumped to stderr
             print STDERR "\n\n" . encode_json($data) . "\n\n";
         }
+    }
+}
+
+sub skynet_msg{
+    my $self = shift;
+    my $text = shift;
+    my $data  = (
+        'action' => 'skynetmessage',
+        'msg'    => $text,
+    );
+
+    my $msg = encode_json($data);
+
+    if ($self->{loggedIn}){
+        print $self->{fh} "$msg\r\n";
+    }
+
+}
+
+sub skynet_msg_all{
+    my $self = shift;
+    my $text = shift;
+
+    foreach my $user ( SkyNet::User::users() ) {
+        $user->skynet_msg($text);
     }
 }
 

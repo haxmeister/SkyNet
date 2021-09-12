@@ -1,0 +1,531 @@
+
+
+/voce list response
+{
+    "action": "getlist",
+    "list": [
+        {
+            "status": "PAID",
+            "name": "bejebajay",
+            "addedby": "",
+            "remaining": "8d 04h 59m",
+            "notes": null
+        },
+        {
+            "status": "PAID",
+            "name": "Hazrul",
+            "addedby": "",
+            "remaining": "0d 19h 48m",
+            "notes": null
+        },
+        {
+            "status": "PAID",
+            "name": "Pandoram",
+            "addedby": "",
+            "remaining": "82d 17h 25m",
+            "notes": null
+        },
+        {
+            "status": "PAID",
+            "name": "Scion Spy",
+            "addedby": "",
+            "remaining": "8d 04h 57m",
+            "notes": null
+        },
+        {
+            "status": "PAID",
+            "name": "\\~:i|II|i:~/",
+            "addedby": "",
+            "remaining": "1d 11h 17m",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "6_iNeedy",
+            "addedby": "YT-1300",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "antibody",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "Ata-Do Bashane",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "autopilot",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "Baekma Goji",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "Broshis Ferraris",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "D0g3r1up5",
+            "addedby": "YT-1300",
+            "remaining": "1d 19h 38m",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Darling",
+            "addedby": "YT-1300",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "DocBonner",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Ecka Estenk",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "Greenwall",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "IToken",
+            "addedby": "YT-1300",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Jessona Salana",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "k'metriq",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "Lisa201",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "Luana Sun",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Mohiam Jik",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Munny",
+            "addedby": "Munny",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Nexxy",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Ostena-Po Estor",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Phaserlight",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "Rodon-Po Estor",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Schmidtrock",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "storm_titty",
+            "addedby": "",
+            "remaining": "--",
+            "notes": ""
+        },
+        {
+            "status": "KOS",
+            "name": "Surbius Bondevo",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "Xandar Tol",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "ALLY",
+            "name": "A-Dawg",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "ALLY",
+            "name": "Bidi Baba",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "ALLY",
+            "name": "Boxcar Willie",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "ALLY",
+            "name": "Choo",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "ALLY",
+            "name": "Dootish",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "ALLY",
+            "name": "Dr. Seuss",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "ALLY",
+            "name": "Fluttershy",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "ALLY",
+            "name": "Il Monstre",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "ALLY",
+            "name": "Look ...No Hands",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "ALLY",
+            "name": "Merlinian",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "ALLY",
+            "name": "Ninjr",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "ALLY",
+            "name": "Pirren",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "ALLY",
+            "name": "Priest King",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "ALLY",
+            "name": "Rin Ganborro",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "ALLY",
+            "name": "Tirish Anau",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        }
+    ],
+    "result": 1
+}
+
+/voce listkos
+
+{
+    "action": "getlist",
+    "list": [
+        {
+            "status": "KOS",
+            "name": "6_iNeedy",
+            "addedby": "YT-1300",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "antibody",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "Ata-Do Bashane",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "autopilot",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "Baekma Goji",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "Broshis Ferraris",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "D0g3r1up5",
+            "addedby": "YT-1300",
+            "remaining": "1d 19h 36m",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Darling",
+            "addedby": "YT-1300",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "DocBonner",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Ecka Estenk",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "Greenwall",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "IToken",
+            "addedby": "YT-1300",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Jessona Salana",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "k'metriq",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "Lisa201",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "Luana Sun",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Mohiam Jik",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Munny",
+            "addedby": "Munny",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Nexxy",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Ostena-Po Estor",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Phaserlight",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "Rodon-Po Estor",
+            "addedby": "YT-1301",
+            "remaining": "--",
+            "notes": "no reason given"
+        },
+        {
+            "status": "KOS",
+            "name": "Schmidtrock",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "storm_titty",
+            "addedby": "",
+            "remaining": "--",
+            "notes": ""
+        },
+        {
+            "status": "KOS",
+            "name": "Surbius Bondevo",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        },
+        {
+            "status": "KOS",
+            "name": "Xandar Tol",
+            "addedby": "",
+            "remaining": "--",
+            "notes": null
+        }
+    ],
+    "result": 1
+}
+
+response to player status check
+{
+    "action": "playerstatus",
+    "name": "Small Turret (*Tamon Ratra)",
+    "result": 1,
+    "status": "Nothing found.",
+    "statustype": 3
+}

@@ -66,13 +66,18 @@ sub auth {
     }
     $sth->finish();
 
+    # when the login successful
     if (@result_list){
         print STDERR $data->{username}." has logged in\n";
+        $sender->skynet_msg_all($data->{username}." connected");
 
         # respond to user client that the auth was successful
         my $msg = '{"action":"auth","result":1}';
         my $fh  = $sender->{fh};
         print $fh "$msg\r\n";
+
+        # notify others of login
+
 
         # Set permissions to match the database results (from first match)
         foreach my $key (keys %{$result_list[0]}){
@@ -89,7 +94,8 @@ sub auth {
     }
 }
 
-sub adduser{
+# voce incompatible adduser
+sub sn_adduser{
     # {"username":"Munny","password":"bananafire35","action":"adduser"}
     my $caller = shift;
     my $data   = shift;
@@ -117,14 +123,14 @@ sub adduser{
         $sth->execute(
                 $data->{username},
                 $data->{password},
-                1, #seespots
-                1, #see chat
-                0, #manage users
-                1, # manage warranties
-                0, # manage statuses
-                1, # see statuses
-                1, # see warranties
-                0 # add bots
+                $data->{seespots},# seespots
+                $data->{seechat}, # see chat
+                $data->{manuser}, # manage users
+                $data->{manwarr}, # manage warranties
+                $data->{manstat}, # manage statuses
+                $data->{seestat}, # see statuses
+                $data->{seewarr}, # see warranties
+                $data->{addbot},  # add bots
             );
             $sth->finish();
             $sender->{db}->commit or print STDERR $DBI::errstr;
@@ -141,5 +147,13 @@ sub logout {
     print STDERR "logout: " . encode_json($data)."\n";
 }
 
+sub playerstatus {
+    my $caller = shift;
+    my $data   = shift;
+    my $sender = shift;  
+    print STDERR "Status check..\n";
+    my $guild_check = "SELECT * FROM status WHERE guild = ?";
+    my $player_check =  "SELECT * FROM status WHERE name = ?";
+}
 
 1;

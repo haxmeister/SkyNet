@@ -64,6 +64,7 @@ sub mux_connection {
             'db'     => $self->{db},
     );
 }
+
 ## accepts a string and outputs it to STDERR with nice colored format
 ## and a time stamp
 sub log_this {

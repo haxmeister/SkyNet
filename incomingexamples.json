@@ -10,7 +10,8 @@
 
 targetting player goli turret
 {"action":"playerstatus","name":"Small Turret (dethtag)"}
-targetting player
+
+targetting player/ player status
 {"action":"playerstatus","name":"dethtag"}
 
 {
