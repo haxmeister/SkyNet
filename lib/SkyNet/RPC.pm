@@ -9,33 +9,8 @@ sub playerseen {
     my $caller = shift;
     my $data   = shift;
     my $sender = shift;
-
-    # this code was to send spots to database
-    # foreach my $player ( @{ $data->{playerlist} } ) {
-    #     $player->{shipname} = $player->{shipname} || "station";
-    #     print STDERR "Seen: [$player->{guildtag}] $player->{name} in $player->{shipname} at $player->{sectorid}\n";
-    #     my $sql ="INSERT INTO seen (guildtag, name, sectorid, shipname, reporter) VALUES (?,?,?,?,?)";
-    #     my $sth = $sender->{db}->prepare($sql);
-    #         $sth->execute(
-    #             $player->{guildtag},
-    #             $player->{name},
-    #             $player->{sectorid},
-    #             $player->{shipname},
-    #             $player->{reporter},
-    #         );
-    #         $sth->finish();
-    #         $sender->{db}->commit or print STDERR $DBI::errstr;
-    # }
-
-    # send data to all permissioned users
     $data->{result} = 1;
-    foreach my $user ( SkyNet::User::users() ) {
-        if ($user->{allowed}{seespots}){
-            my $msg = encode_json($data);
-            my $fh = $user->{fh};
-            print $fh "$msg\r\n" unless $user eq $sender;
-        }
-    }
+    $sender->spot_broadcast($data);
 }
 
 sub channel {
@@ -43,14 +18,7 @@ sub channel {
     my $data   = shift;
     my $sender = shift;
     $data->{result} = 1;
-
-    foreach my $user ( SkyNet::User::users() ) {
-        if ($user->{allowed}{seechat}){
-            my $msg = encode_json($data);
-            my $fh  = $sender->{fh};
-            print $fh "$msg\r\n" unless $user eq $sender;
-        }
-    }
+    $sender->chat_broadcast($data);
 }
 
 sub auth {
@@ -159,10 +127,72 @@ sub logout {
 sub playerstatus {
     my $caller = shift;
     my $data   = shift;
-    my $sender = shift;  
+    my $sender = shift;
+    my %res = {
+        "action"     => "playerstatus",
+        "name"       => $data->{name},
+        "result"     => 1,        
+    };
+
+    
     print STDERR "Status check..\n";
-    my $guild_check = "SELECT * FROM status WHERE guild = ?";
-    my $player_check =  "SELECT * FROM status WHERE name = ?";
+    my $sth = $sender->{db}->prepare("SELECT * FROM playerlist WHERE name = ?");
+    $sth->execute($data->{name});
+    my $row = $sth->fetchrow_hashref();
+    $sth->finish();
+
+    my $statustype;
+    my $status;
+    my $elapsed;
+    my $now = time();
+    my $remaining;
+    if ($row) {
+            if ($row->{'type'} ==1 ) { # KOS
+                $statustype = 1;
+                $status = 'Player is KOS';
+            } elsif ($row->{'type'} == 2) {
+                $statustype = 3;
+                $status = 'Player is ALLY';
+            } else {
+                $elapsed = $now - $row->{'ts'}; # Seconds elapsed
+                $remaining = $row->{'length'} - $elapsed;
+                if ($remaining<60) { # Expired
+                    $statustype = 1;
+                    $status = 'Payment expired!';
+                    $sth = $sender->{db}->prepare("DELETE FROM playerlist WHERE id=?");
+                    $sth->execute($row->{'id'});
+                } else {
+                    $status = 'Paid - remaining: ' . $caller->getTimeStr($remaining);
+                    $statustype = 2;
+                }
+            }
+        } else {
+            $statustype = 3;
+            $status = 'Nothing found.';
+        }
+        $res{'status'} = $status;
+        $res{'statustype'} = $statustype;
+        $sender->respond(\%res);
 }
 
+sub announce {
+    my $caller = shift;
+    my $data   = shift;
+    my $sender = shift;
+
+    $data->{result} = 1;
+    $sender->announce_broadcast($data);
+}
+sub getTimeStr {
+    my $secs = shift;
+    if ($secs<0) {
+            return "--";
+    }
+    my $days = int($secs / 86400);
+    my $rem = $secs - ($days*86400);
+    my $hours = int($rem / 3600);
+    $rem = $rem - ($hours * 3600);
+    my $min = int($rem / 60);
+    return sprintf("%dd %02dh %02dm", $days, $hours, $min);
+}
 1;

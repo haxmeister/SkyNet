@@ -67,7 +67,7 @@ sub process_command {
     my $self = shift;
     my $cmd  = shift;
 
-    print STDERR $cmd."received \n";
+    #print STDERR $cmd."received \n";
 
     # attempt to successfully decode the json
     my $data;
@@ -79,7 +79,7 @@ sub process_command {
         # look for rpc by the same name as action field
         my $action = $data->{action};
         if ( SkyNet::RPC->can($action) ) {
-            print STDERR "$action ..found\n";
+            print STDERR "$action ..received from: "$self->{name}."\n";
             SkyNet::RPC::->$action( $data, $self );
         }
         else{
@@ -87,6 +87,13 @@ sub process_command {
             print STDERR "\n\n" . encode_json($data) . "\n\n";
         }
     }
+}
+
+sub respond{
+    my $self = shift;
+    my $msg_data = shift;
+    
+    print {$self->{fh}} encode_json($msg_data)."\r\n";
 }
 
 sub skynet_msg{
@@ -124,6 +131,37 @@ sub get_online_user_names{
     return @userlist;
 }
 
+sub chat_broadcast{
+    my $self = shift;
+    my $data = shift;
+    foreach my $user ( SkyNet::User::users() ) {
+        if ($user->{allowed}{seechat}){
+            my $msg = encode_json($data);
+            print {$self->{fh}} "$msg\r\n" unless $user eq $self;
+        }
+    }
+}
+
+sub spot_broadcast{
+    my $self = shift;
+    my $data = shift;
+    foreach my $user ( SkyNet::User::users() ) {
+        if ($user->{allowed}{seespots}){
+            my $msg = encode_json($data);
+            print {$user->{fh}} "$msg\r\n" unless $user eq $self;
+        }
+    }
+}
+
+sub announce_broadcast{
+    my $self = shift;
+    my $data = shift;
+
+    foreach my $user ( SkyNet::User::users() ) {
+        my $msg = encode_json($data);
+        print {$user->{fh}} "$msg\r\n" unless $user eq $self;
+    }
+}
 ## accepts a string and outputs it to STDERR with nice colored format
 ## and a time stamp
 sub log_this {
