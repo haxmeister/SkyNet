@@ -134,7 +134,7 @@ sub get_online_user_names{
 sub chat_broadcast{
     my $self = shift;
     my $data = shift;
-    my $msg  = encode_json(data);
+    my $msg  = encode_json($data);
 
     foreach my $user ( SkyNet::User::users() ) {
         if ($user->{allowed}{seechat}){
