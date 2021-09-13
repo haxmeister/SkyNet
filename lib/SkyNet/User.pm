@@ -137,7 +137,7 @@ sub chat_broadcast{
     foreach my $user ( SkyNet::User::users() ) {
         if ($user->{allowed}{seechat}){
             my $msg = encode_json($data);
-            print {$self->{fh}} "$msg\r\n" unless $user eq $self;
+            print {$self->{fh}} "$msg\r\n" unless $user->{fh} eq $self->{fh};
         }
     }
 }
