@@ -184,6 +184,7 @@ sub announce {
     $sender->announce_broadcast($data);
 }
 sub getTimeStr {
+    my $caller = shift;
     my $secs = shift;
     if ($secs<0) {
             return "--";
