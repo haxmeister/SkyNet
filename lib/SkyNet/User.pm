@@ -79,7 +79,7 @@ sub process_command {
         # look for rpc by the same name as action field
         my $action = $data->{action};
         if ( SkyNet::RPC->can($action) ) {
-            print STDERR "$action ..received from: "$self->{name}."\n";
+            print STDERR "$action ..received from: ".$self->{name}."\n";
             SkyNet::RPC::->$action( $data, $self );
         }
         else{
@@ -162,6 +162,7 @@ sub announce_broadcast{
         print {$user->{fh}} "$msg\r\n" unless $user eq $self;
     }
 }
+
 ## accepts a string and outputs it to STDERR with nice colored format
 ## and a time stamp
 sub log_this {
