@@ -128,11 +128,11 @@ sub playerstatus {
     my $caller = shift;
     my $data   = shift;
     my $sender = shift;
-    my %res = {
+    my %res = (
         "action"     => "playerstatus",
         "name"       => $data->{name},
         "result"     => 1,        
-    };
+    );
 
     
     print STDERR "Status check..\n";
