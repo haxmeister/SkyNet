@@ -134,6 +134,8 @@ sub get_online_user_names{
 sub chat_broadcast{
     my $self = shift;
     my $data = shift;
+    print STDERR "This person has this perms\n";
+    print STDERR encode_json($self->{allowed});
     foreach my $user ( SkyNet::User::users() ) {
         if ($user->{allowed}{seechat}){
             my $msg = encode_json($data);
