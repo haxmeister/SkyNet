@@ -14,7 +14,7 @@ sub new {
         'mux'     => $args{mux},
         'fh'      => $args{fh},
         'db'      => $args{db},
-        'name'    => '',
+        'name'    => 'unlogged-user',
         'loggedIn'=> 0,
         'allowed' => {
             'seespots' => 0,    # can see spots
@@ -56,6 +56,10 @@ sub mux_close {
 
     # User disconnected;
     print STDERR  "User ".$self->{name}." disconnected..\n";
+    
+    # notify others of logoff
+    $self->skynet_msg_all($self->{name}." departed..");
+    
     delete $users{$self};
 }
 
@@ -88,15 +92,17 @@ sub process_command {
 sub skynet_msg{
     my $self = shift;
     my $text = shift;
-    my $data  = (
+    my $data  = {
         'action' => 'skynetmessage',
         'msg'    => $text,
-    );
-
+        'result' => 1,
+    };
+    my $fh = $self->{fh};
     my $msg = encode_json($data);
 
     if ($self->{loggedIn}){
-        print $self->{fh} "$msg\r\n";
+        print STDERR "sending $msg to ".$self->{name}."\n";
+        print $fh "$msg\r\n";
     }
 
 }
@@ -104,10 +110,18 @@ sub skynet_msg{
 sub skynet_msg_all{
     my $self = shift;
     my $text = shift;
-
     foreach my $user ( SkyNet::User::users() ) {
         $user->skynet_msg($text);
     }
+}
+
+sub get_online_user_names{
+    my $self = shift;
+    my @userlist;
+    foreach my $user ( SkyNet::User::users() ) {
+        push @userlist, $user->{name};
+    }
+    return @userlist;
 }
 
 ## accepts a string and outputs it to STDERR with nice colored format

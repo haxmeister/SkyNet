@@ -10,28 +10,29 @@ sub playerseen {
     my $data   = shift;
     my $sender = shift;
 
-    foreach my $player ( @{ $data->{playerlist} } ) {
-        $player->{shipname} = $player->{shipname} || "station";
-        print STDERR "Seen: [$player->{guildtag}] $player->{name} in $player->{shipname} at $player->{sectorid}\n";
-        my $sql ="INSERT INTO seen (guildtag, name, sectorid, shipname, reporter) VALUES (?,?,?,?,?)";
-        my $sth = $sender->{db}->prepare($sql);
-            $sth->execute(
-                $player->{guildtag},
-                $player->{name},
-                $player->{sectorid},
-                $player->{shipname},
-                $player->{reporter},
-            );
-            $sth->finish();
-            $sender->{db}->commit or print STDERR $DBI::errstr;
-    }
+    # this code was to send spots to database
+    # foreach my $player ( @{ $data->{playerlist} } ) {
+    #     $player->{shipname} = $player->{shipname} || "station";
+    #     print STDERR "Seen: [$player->{guildtag}] $player->{name} in $player->{shipname} at $player->{sectorid}\n";
+    #     my $sql ="INSERT INTO seen (guildtag, name, sectorid, shipname, reporter) VALUES (?,?,?,?,?)";
+    #     my $sth = $sender->{db}->prepare($sql);
+    #         $sth->execute(
+    #             $player->{guildtag},
+    #             $player->{name},
+    #             $player->{sectorid},
+    #             $player->{shipname},
+    #             $player->{reporter},
+    #         );
+    #         $sth->finish();
+    #         $sender->{db}->commit or print STDERR $DBI::errstr;
+    # }
 
     # send data to all permissioned users
     $data->{result} = 1;
     foreach my $user ( SkyNet::User::users() ) {
         if ($user->{allowed}{seespots}){
             my $msg = encode_json($data);
-            my $fh = $sender->{fh};
+            my $fh = $user->{fh};
             print $fh "$msg\r\n" unless $user eq $sender;
         }
     }
@@ -68,16 +69,24 @@ sub auth {
 
     # when the login successful
     if (@result_list){
+        
+        $sender->{loggedIn} = 1;
         print STDERR $data->{username}." has logged in\n";
-        $sender->skynet_msg_all($data->{username}." connected");
-
+        
         # respond to user client that the auth was successful
         my $msg = '{"action":"auth","result":1}';
         my $fh  = $sender->{fh};
         print $fh "$msg\r\n";
 
-        # notify others of login
+        # update user name
+        $sender->{name} = $data->{username};
 
+        # notify others of login
+        $sender->skynet_msg_all($data->{username}." arrived..");
+
+        # respond to user who is online
+        my $users_online = join ' : ',$sender->get_online_user_names();
+        $sender->skynet_msg("Users online: ($users_online)");
 
         # Set permissions to match the database results (from first match)
         foreach my $key (keys %{$result_list[0]}){

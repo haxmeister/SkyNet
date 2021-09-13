@@ -16,7 +16,7 @@ sub new {
     };
 
     $self->{db} = DBI->connect(
-        'dbi:mysql:skynet',
+        'dbi:mysql:famytools',
         $args{db_username},
         $args{db_password},
         { RaiseError => 1, AutoCommit => 0 },
@@ -64,7 +64,6 @@ sub mux_connection {
             'db'     => $self->{db},
     );
 }
-
 ## accepts a string and outputs it to STDERR with nice colored format
 ## and a time stamp
 sub log_this {
