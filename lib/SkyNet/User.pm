@@ -134,14 +134,11 @@ sub get_online_user_names{
 sub chat_broadcast{
     my $self = shift;
     my $data = shift;
-    print STDERR "This person has this";
-    print STDERR encode_json($self->{allowed});
+    my $msg  = encode_json(data);
+
     foreach my $user ( SkyNet::User::users() ) {
-        print STDERR "checking this user\n";
         if ($user->{allowed}{seechat}){
-            print STDERR "this user allowed\n";
-            my $msg = encode_json($data);
-            print {$self->{fh}} "$msg\r\n";# unless $user->{fh} eq $self->{fh};
+            print {$user->{fh}} "$msg\r\n";# unless $user->{fh} eq $self->{fh};
         }
     }
 }
