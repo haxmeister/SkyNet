@@ -197,7 +197,7 @@ sub list{
     my $sender = shift;
     my $now    = time();
     my %res = (
-        'action' => 'getlist',
+        'action' => 'showlist',
         'result' => 1,
         'list'   => undef,
     );
@@ -246,7 +246,9 @@ sub list{
     }
 }
 
-sub listpayment{}
+sub listpayment{
+    
+}
 sub listkos{}
 sub listallies{}
 
