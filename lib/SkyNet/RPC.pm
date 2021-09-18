@@ -203,22 +203,43 @@ sub list{
     );
     my $sth = $sender->{db}->prepare("SELECT * FROM playerlist ORDER BY type, name");
     $sth->execute();
+    my $count = 0;
     while(my $row = $sth->fetchrow_hashref()){
-        if($row->{type} eq 0){$row->{type} = "PAID"}
-        elsif($row->{type} eq 1){$row->{type} = "KOS"}
-        elsif($row->{type} eq 2){$row->{type} = "ALLY"}
-        my $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
+        $count++ if $row;
+        my $remaining = '--';
+        
+        if($row->{type} eq 0){
+            $row->{type} = "PAID";
+            $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
+        }
+        elsif($row->{type} eq 1){
+            $row->{type} = "KOS";
+            $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
+        }
+        elsif($row->{type} eq 2){
+            $row->{type} = "ALLY";
+        }
+        
+        
         push(@{$res{list}}, (
-            'status' => $row->{type},
-            'name'   => $row->{name},
-            'addedby'=> $row->{addedby},
+            'status'   => $row->{type},
+            'name'     => $row->{name},
+            'addedby'  => $row->{addedby},
             'remaining'=> $remaining,
             'notes'    => $row->{notes},
         ));
     }
     $sth->finish();
-    $sender->respond(\%res);
-    print STDERR encode_json(\%res);
+    if ($count){
+        $sender->respond(\%res);
+    }
+    else{
+        $sender->respond({
+            'action' => 'list',
+            'result' => 0,
+            'error'  => "list is empty..",
+        });
+    }
 }
 
 sub listpayment{}
