@@ -184,13 +184,6 @@ sub announce {
     $sender->announce_broadcast($data);
 }
 
-sub getlist{
-    my $caller = shift;
-    my $data   = shift;
-    my $sender = shift;
-    my $now    = time();   
-}
-
 sub list{
     my $caller = shift;
     my $data   = shift;
@@ -199,25 +192,27 @@ sub list{
     my %res = (
         'action' => 'showlist',
         'result' => 1,
-        'list'   => undef,
+        'list'   => 0,
     );
     my $sth = $sender->{db}->prepare("SELECT * FROM playerlist ORDER BY type, name");
     $sth->execute();
     
     my $count = 0;
     while(my $row = $sth->fetchrow_hashref()){
-        if ($row){$count++};
         my $remaining = '--';
         
         if($row->{type} eq 0){
+            if (! $sender->{allowed}{seewarr}){next;}
             $row->{type} = "PAID";
             $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
         }
         elsif($row->{type} eq 1){
+            if (! $sender->{allowed}{seestat}){next;}
             $row->{type} = "KOS";
             $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
         }
         elsif($row->{type} eq 2){
+            if (! $sender->{allowed}{seestat}){next;}
             $row->{type} = "ALLY";
         }
         
@@ -232,7 +227,7 @@ sub list{
     }
     $sth->finish();
 
-    if ($count){
+    if ($res{list}){
         $sender->respond(\%res);
         print STDERR "list is not empty\n";
     }
@@ -247,9 +242,60 @@ sub list{
 }
 
 sub listpayment{
-    
+
 }
-sub listkos{}
+sub listkos{
+    my $caller = shift;
+    my $data   = shift;
+    my $sender = shift;
+    my $now    = time();
+    my %res = (
+        'action' => 'showlist',
+        'result' => 1,
+        'list'   => 0,
+    );
+
+    # check user permissions
+    if (! $sender->{allowed}{seestat}){
+        $sender->respond({action=>'showlist', result=>'0',msg => "Not authorized to see status list.."});
+    }
+
+    # prepare query
+    my $sth = $sender->{db}->prepare("SELECT * FROM playerlist WHERE type=1 ORDER BY name");
+    $sth->execute();
+    
+    my $count = 0;
+    while(my $row = $sth->fetchrow_hashref()){
+        my $remaining = '--';
+                   
+        $row->{type} = "KOS";
+        $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
+        
+        
+        push(@{$res{list}}, {
+            'status'   => $row->{type},
+            'name'     => $row->{name},
+            'addedby'  => $row->{addedby},
+            'remaining'=> $remaining,
+            'notes'    => $row->{notes},
+    });
+    }
+    $sth->finish();
+
+    if ($res{list}){
+        $sender->respond(\%res);
+        print STDERR "list is not empty\n";
+    }
+    else{
+        $sender->respond({
+            'action' => 'list',
+            'result' => 0,
+            'error'  => "list is empty..",
+        });
+        print STDERR "list is empty\n";
+    }   
+}
+
 sub listallies{}
 
 sub getTimeStr {
