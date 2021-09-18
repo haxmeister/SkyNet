@@ -526,7 +526,7 @@ sub addkos{
         $sth->execute($data->{name});
         $sth->finish();
 
-        $sql = "INSERT INTO playerlist (type, ts, name, length, addedby, notes) VALUES(?,?,?,?,?)";
+        $sql = "INSERT INTO playerlist (type, ts, name, length, addedby, notes) VALUES(?,?,?,?,?,?)";
         $sth = $sender->{db}->prepare($sql);
         $sth->execute(
             1, 
@@ -534,7 +534,7 @@ sub addkos{
             $data->{name}, 
             $length, 
             $sender->{name},
-            $data->{notes} || '',
+            $data->{notes} || 'none',
         );
         $sth->finish();
 
