@@ -494,13 +494,13 @@ sub addkos{
     my $sender = shift;
     my $now    = time(); 
     my %res = (
-        'action'=>"addpayment", 
+        'action'=>"addkos", 
         'name'  =>$data->{name}
     );
 
     #check permissions
     if (! $sender->{allowed}{manstat}){
-        $sender->respond({action=>'addlps', result=>'0',error => "Not authorized to manage statuses.."});
+        $sender->respond({action=>'addkos', result=>'0',error => "Not authorized to manage statuses.."});
         return;
     }
 
