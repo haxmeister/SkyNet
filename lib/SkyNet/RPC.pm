@@ -455,7 +455,7 @@ sub addpayment{
         $res{result} = 1;
     }
     $sender->respond(\%res);
-
+    $sender->announce_broadcast($data->{name}." purchased a warranty from ".$sender->{name}."!")
 }
 sub getTimeStr {
     my $secs = shift;
