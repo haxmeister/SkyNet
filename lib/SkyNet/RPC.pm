@@ -204,6 +204,9 @@ sub list{
     my $sth = $sender->{db}->prepare("SELECT * FROM playerlist ORDER BY type, name");
     $sth->execute();
     while(my $row = $sth->fetchrow_hashref()){
+        if($row->{type} eq 0){$row->{type} = "PAID"}
+        if($row->{type} eq 1){$row->{type} = "KOS"}
+        if($row->{type} eq 2){$row->{type} = "ALLY"}
         push(@{$res{list}}, $row);
     }
     $sth->finish();
