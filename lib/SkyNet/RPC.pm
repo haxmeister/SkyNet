@@ -455,8 +455,37 @@ sub addpayment{
         $res{result} = 1;
     }
     $sender->respond(\%res);
-    $sender->skynet_msg_all($data->{name}." purchased a warranty from ".$sender->{name}."!")
+
+    foreach my $user ( SkyNet::User::users() ) {
+        if ($user->{allowed}{seewarr}){
+            $user->skynet_msg($data->{name}." purchased a warranty from ".$sender->{name}."!");
+        }
+    }
 }
+
+sub removepayment{
+    my $caller = shift;
+    my $data   = shift;
+    my $sender = shift;
+    my %res    =(
+        'action' => 'removepament',
+        'result' => 1
+    );
+
+    #check permissions
+    if (! $sender->{allowed}{manwarr}){
+        $sender->respond({action=>'removepayment', result=>'0',msg => "Not authorized to manage warranties.."});
+        return;
+    }
+
+    my $sql = "DELETE FROM playerlist WHERE name=?";
+    my $sth = $sender->{db}->prepare($sql);
+    $sth->execute($data->{name});
+    $sth->finish();
+
+    $sender->respond(\%res);
+}
+
 sub getTimeStr {
     my $secs = shift;
     if ($secs<0) {
