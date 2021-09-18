@@ -65,7 +65,7 @@ sub auth {
     }else{
 
         print STDERR "failed login attempt ".encode_json($data)."\n";
-        my $msg = '{"action":"auth","result":0,}';
+        my $msg = '{"action":"auth","result":0,"error":"user not found"}';
         my $fh  = $sender->{fh};
         print $fh ( $msg . "\r\n" );
     }
@@ -415,14 +415,14 @@ sub addpayment{
 
     #check permissions
     if (! $sender->{allowed}{manwarr}){
-        $sender->respond({action=>'addpayment', result=>'0',msg => "Not authorized to manage warranties.."});
+        $sender->respond({action=>'addpayment', result=>'0',error => "Not authorized to manage warranties.."});
         return;
     }
     my @match = $data->{length} =~ /^(\d+)([dhm]?)$/;
 
     if(! @match){
         $res{'result'} = 0;
-        $res{'msg'}  = "Invalid time period parameter.";
+        $res{'error'}  = "Invalid time period parameter.";
     }else{
         my $length = $match[0];
         my $interval = $match[1];
@@ -470,7 +470,7 @@ sub removepayment{
  
     #check permissions
     if (! $sender->{allowed}{manwarr}){
-        $sender->respond({action=>'removepayment', result=>'0',msg => "Not authorized to manage warranties.."});
+        $sender->respond({action=>'removepayment', result=>'0',error => "Not authorized to manage warranties.."});
         return;
     }
 
@@ -500,7 +500,7 @@ sub addkos{
 
     #check permissions
     if (! $sender->{allowed}{manstat}){
-        $sender->respond({action=>'addlps', result=>'0',msg => "Not authorized to manage statuses.."});
+        $sender->respond({action=>'addlps', result=>'0',error => "Not authorized to manage statuses.."});
         return;
     }
 
@@ -556,7 +556,7 @@ sub removekos{
  
     #check permissions
     if (! $sender->{allowed}{manwstat}){
-        $sender->respond({action=>'removekos', result=>'0',msg => "Not authorized to manage statuses.."});
+        $sender->respond({action=>'removekos', result=>'0',error => "Not authorized to manage statuses.."});
         return;
     }
 
@@ -567,7 +567,7 @@ sub removekos{
 
     $sender->respond({action=>'removekos', result=>'1'});
 
-        foreach my $user ( SkyNet::User::users() ) {
+    foreach my $user ( SkyNet::User::users() ) {
         if ($user->{allowed}{seestat}){
             $user->skynet_msg($data->{name}."'s KOS has been removed by ".$sender->{name}."!");
         }
