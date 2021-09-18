@@ -134,7 +134,10 @@ sub playerstatus {
         "result"     => 1,        
     );
 
-    
+    # check user permissions
+    if (! $sender->{allowed}{seestat}){
+        return;
+    }
     print STDERR "Status check..\n";
     my $sth = $sender->{db}->prepare("SELECT * FROM playerlist WHERE name = ?");
     $sth->execute($data->{name});
@@ -255,6 +258,7 @@ sub listpayment{
     # check user permissions
     if (! $sender->{allowed}{seestat}){
         $sender->respond({action=>'showlist', result=>'0',msg => "Not authorized to see status list.."});
+        return;
     }
 
     # prepare query
@@ -292,6 +296,7 @@ sub listpayment{
         print STDERR "list is empty\n";
     }   
 }
+
 sub listkos{
     my $caller = shift;
     my $data   = shift;
@@ -306,6 +311,7 @@ sub listkos{
     # check user permissions
     if (! $sender->{allowed}{seestat}){
         $sender->respond({action=>'showlist', result=>'0',msg => "Not authorized to see status list.."});
+        return;
     }
 
     # prepare query
@@ -358,6 +364,7 @@ sub listallies{
     # check user permissions
     if (! $sender->{allowed}{seestat}){
         $sender->respond({action=>'showlist', result=>'0',msg => "Not authorized to see status list.."});
+        return;
     }
 
     # prepare query
@@ -396,6 +403,59 @@ sub listallies{
     }   
 }
 
+sub addpayment{
+    my $caller = shift;
+    my $data   = shift;
+    my $sender = shift;
+    my $now    = time(); 
+    my %res = (
+        'action'=>"addpayment", 
+        'name'  =>$data->{name}
+    );
+
+    #check permissions
+    if (! $sender->{allowed}{manwarr}){
+        $sender->respond({action=>'addpayment', result=>'0',msg => "Not authorized to manage warranties.."});
+        return;
+    }
+
+    if(! $data->{length} =~ /^(\d+)([dhm]?)$/){
+        $res{'result'} = 0;
+        $res{'msg'}  = "Invalid time period parameter.";
+    }else{
+        my $length = $1;
+        my $interval = $2;
+
+        if ($interval eq 'd'){
+            $length  *= 86400;
+        }elsif($interval eq 'h'){
+            $length *= 3600;
+        }else{
+            $length *= 60;
+        }
+
+        # remove previous entry (per yt)
+        my $sql = "DELETE FROM playerlist WHERE name=?";
+        my $sth = $sender->{db}->prepare($sql);
+        $sth->execute($data->{name});
+        $sth->finish();
+
+        $sql = "INSERT INTO playerlist (type, ts, name, length, addedby) VALUES(?,?,?,?,?)";
+        $sth = $sender->{db}->prepare($sql);
+        $sth->execute(
+            0, 
+            $now, 
+            $data->{name}, 
+            $data->{len}, 
+            $data->{addedby},
+        );
+        $sth->finish();
+
+        $res{result} = 1;
+    }
+    $sender->respond(\%res);
+
+}
 sub getTimeStr {
     my $secs = shift;
     if ($secs<0) {
