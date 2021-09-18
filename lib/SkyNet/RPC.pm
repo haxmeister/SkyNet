@@ -529,12 +529,12 @@ sub addkos{
         $sql = "INSERT INTO playerlist (type, ts, name, length, addedby, notes) VALUES(?,?,?,?,?)";
         $sth = $sender->{db}->prepare($sql);
         $sth->execute(
-            0, 
+            1, 
             $now, 
             $data->{name}, 
             $length, 
-            $data->{addedby},
-            $data->{notes},
+            $sender->{name},
+            $data->{notes} || '',
         );
         $sth->finish();
 
