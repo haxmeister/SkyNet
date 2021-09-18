@@ -208,7 +208,7 @@ sub list{
     }
     $sth->finish();
     $sender->respond(\%res);
-    print STDERR json_decode(\%res);
+    print STDERR encode_json(\%res);
 }
 
 sub listpayment{}
