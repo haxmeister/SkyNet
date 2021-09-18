@@ -203,6 +203,7 @@ sub list{
     );
     my $sth = $sender->{db}->prepare("SELECT * FROM playerlist ORDER BY type, name");
     $sth->execute();
+    
     my $count = 0;
     while(my $row = $sth->fetchrow_hashref()){
         $count++ if $row;
@@ -211,6 +212,7 @@ sub list{
         if($row->{type} eq 0){
             $row->{type} = "PAID";
             $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
+            print STDERR "sending to gettimestring ($row->{length} - ($now - $row->{ts})\n";
         }
         elsif($row->{type} eq 1){
             $row->{type} = "KOS";
