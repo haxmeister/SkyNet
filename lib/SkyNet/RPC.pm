@@ -296,7 +296,57 @@ sub listkos{
     }   
 }
 
-sub listallies{}
+sub listallies{
+    my $caller = shift;
+    my $data   = shift;
+    my $sender = shift;
+    my $now    = time();
+    my %res = (
+        'action' => 'showlist',
+        'result' => 1,
+        'list'   => [],
+    );
+
+    # check user permissions
+    if (! $sender->{allowed}{seestat}){
+        $sender->respond({action=>'showlist', result=>'0',msg => "Not authorized to see status list.."});
+    }
+
+    # prepare query
+    my $sth = $sender->{db}->prepare("SELECT * FROM playerlist WHERE type=2 ORDER BY name");
+    $sth->execute();
+    
+    my $count = 0;
+    while(my $row = $sth->fetchrow_hashref()){
+        my $remaining = '--';
+                   
+        $row->{type} = "ALLY";
+        $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
+        
+        
+        push(@{$res{list}}, {
+            'status'   => $row->{type},
+            'name'     => $row->{name},
+            'addedby'  => $row->{addedby},
+            'remaining'=> $remaining,
+            'notes'    => $row->{notes},
+        });
+    }
+    $sth->finish();
+
+    if ($res{list}){
+        $sender->respond(\%res);
+        print STDERR "list is not empty\n";
+    }
+    else{
+        $sender->respond({
+            'action' => 'list',
+            'result' => 0,
+            'error'  => "list is empty..",
+        });
+        print STDERR "list is empty\n";
+    }   
+}
 
 sub getTimeStr {
     my $secs = shift;
