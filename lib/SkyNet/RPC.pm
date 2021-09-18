@@ -205,9 +205,16 @@ sub list{
     $sth->execute();
     while(my $row = $sth->fetchrow_hashref()){
         if($row->{type} eq 0){$row->{type} = "PAID"}
-        if($row->{type} eq 1){$row->{type} = "KOS"}
-        if($row->{type} eq 2){$row->{type} = "ALLY"}
-        push(@{$res{list}}, $row);
+        elsif($row->{type} eq 1){$row->{type} = "KOS"}
+        elsif($row->{type} eq 2){$row->{type} = "ALLY"}
+        my $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
+        push(@{$res{list}}, (
+            'status' => $row->{type},
+            'name'   => $row->{name},
+            'addedby'=> $row->{addedby},
+            'remaining'=> $remaining,
+            'notes'    => $row->{notes},
+        ));
     }
     $sth->finish();
     $sender->respond(\%res);
