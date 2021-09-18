@@ -206,7 +206,7 @@ sub list{
     
     my $count = 0;
     while(my $row = $sth->fetchrow_hashref()){
-        $count++ if $row;
+        if ($row){$count++};
         my $remaining = '--';
         
         if($row->{type} eq 0){
@@ -231,6 +231,7 @@ sub list{
         ));
     }
     $sth->finish();
+
     if ($count){
         $sender->respond(\%res);
     }
