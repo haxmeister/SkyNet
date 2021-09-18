@@ -480,6 +480,12 @@ sub removepayment{
     $sth->finish();
 
     $sender->respond({action=>'removepayment', result=>'1'});
+
+        foreach my $user ( SkyNet::User::users() ) {
+        if ($user->{allowed}{seewarr}){
+            $user->skynet_msg($data->{name}."'s warranty has been removed by ".$sender->{name}."!");
+        }
+    }
 }
 
 sub getTimeStr {
