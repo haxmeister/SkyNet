@@ -199,7 +199,7 @@ sub list{
     my %res = (
         'action' => 'getlist',
         'result' => 1,
-        'list'   => [],
+        'list'   => undef,
     );
     my $sth = $sender->{db}->prepare("SELECT * FROM playerlist ORDER BY type, name");
     $sth->execute();
@@ -208,7 +208,7 @@ sub list{
     }
     $sth->finish();
     $sender->respond(\%res);
-    $sender->{fh};
+    print STDERR json_decode(\%res);
 }
 
 sub listpayment{}
