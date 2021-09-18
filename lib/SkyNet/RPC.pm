@@ -234,6 +234,7 @@ sub list{
 
     if ($count){
         $sender->respond(\%res);
+        print STDERR "list is not empty\n";
     }
     else{
         $sender->respond({
@@ -241,6 +242,7 @@ sub list{
             'result' => 0,
             'error'  => "list is empty..",
         });
+        print STDERR "list is empty\n";
     }
 }
 
