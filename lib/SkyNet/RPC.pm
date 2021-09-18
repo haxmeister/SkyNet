@@ -183,6 +183,38 @@ sub announce {
     $data->{result} = 1;
     $sender->announce_broadcast($data);
 }
+
+sub getlist{
+    my $caller = shift;
+    my $data   = shift;
+    my $sender = shift;
+    my $now    = time();   
+}
+
+sub list{
+    my $caller = shift;
+    my $data   = shift;
+    my $sender = shift;
+    my $now    = time();
+    my %res = (
+        'action' => 'getlist',
+        'result' => 1,
+        'list'   => [],
+    );
+    my $sth = $sender->{db}->prepare("SELECT * FROM playerlist ORDER BY type, name");
+    $sth->execute();
+    while(my $row = $sth->fetchrow_hashref()){
+        push(@{$res{list}}, $row);
+    }
+    $sth->finish();
+    $sender->respond(\%res);
+    $sender->{fh};
+}
+
+sub listpayment{}
+sub listkos{}
+sub listallies{}
+
 sub getTimeStr {
     my $caller = shift;
     my $secs = shift;
