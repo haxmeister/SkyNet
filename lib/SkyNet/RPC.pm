@@ -211,11 +211,12 @@ sub list{
         
         if($row->{type} eq 0){
             $row->{type} = "PAID";
-            $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
             print STDERR "sending to gettimestring ($row->{length} - ($now - $row->{ts})\n";
+            $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
         }
         elsif($row->{type} eq 1){
             $row->{type} = "KOS";
+            print STDERR "sending to gettimestring ($row->{length} - ($now - $row->{ts})\n";
             $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
         }
         elsif($row->{type} eq 2){
