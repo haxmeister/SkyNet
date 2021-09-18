@@ -418,7 +418,7 @@ sub addpayment{
         $sender->respond({action=>'addpayment', result=>'0',msg => "Not authorized to manage warranties.."});
         return;
     }
-    my @match = {$data->{length}} =~ /^(\d+)([dhm]?)$/;
+    my @match = $data->{length} =~ /^(\d+)([dhm]?)$/;
     if(! @match){
         $res{'result'} = 0;
         $res{'msg'}  = "Invalid time period parameter.";
