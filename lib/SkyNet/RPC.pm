@@ -467,11 +467,7 @@ sub removepayment{
     my $caller = shift;
     my $data   = shift;
     my $sender = shift;
-    my %res    =(
-        'action' => 'removepament',
-        'result' => 1
-    );
-
+ 
     #check permissions
     if (! $sender->{allowed}{manwarr}){
         $sender->respond({action=>'removepayment', result=>'0',msg => "Not authorized to manage warranties.."});
@@ -483,7 +479,7 @@ sub removepayment{
     $sth->execute($data->{name});
     $sth->finish();
 
-    $sender->respond(\%res);
+    $sender->respond({action=>'removepayment', result=>'1'});
 }
 
 sub getTimeStr {
