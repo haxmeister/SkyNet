@@ -534,7 +534,7 @@ sub addkos{
             $data->{name}, 
             $length, 
             $sender->{name},
-            $data->{notes} || 'none',
+            $data->{notes},
         );
         $sth->finish();
 
