@@ -252,7 +252,7 @@ sub listkos{
     my %res = (
         'action' => 'showlist',
         'result' => 1,
-        'list'   => 0,
+        'list'   => [],
     );
 
     # check user permissions
@@ -278,7 +278,7 @@ sub listkos{
             'addedby'  => $row->{addedby},
             'remaining'=> $remaining,
             'notes'    => $row->{notes},
-    });
+        });
     }
     $sth->finish();
 
