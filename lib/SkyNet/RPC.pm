@@ -503,8 +503,8 @@ sub addkos{
         $sender->respond({action=>'addlps', result=>'0',msg => "Not authorized to manage statuses.."});
         return;
     }
-    my @match = $data->{length} =~ /^(\d+)([dhm]?)$/;
 
+    my @match = $data->{length} =~ /^(\d+)([dhm]?)$/;
     if(! @match){
         $res{'result'} = 0;
         $res{'msg'}  = "Invalid time period parameter.";
@@ -547,8 +547,31 @@ sub addkos{
             $user->skynet_msg($data->{name}." has been labeled KOS by ".$sender->{name}."!");
         }
     }
+}
 
+sub removekos{
+    my $caller = shift;
+    my $data   = shift;
+    my $sender = shift;
+ 
+    #check permissions
+    if (! $sender->{allowed}{manwstat}){
+        $sender->respond({action=>'removekos', result=>'0',msg => "Not authorized to manage statuses.."});
+        return;
+    }
 
+    my $sql = "DELETE FROM playerlist WHERE name=?";
+    my $sth = $sender->{db}->prepare($sql);
+    $sth->execute($data->{name});
+    $sth->finish();
+
+    $sender->respond({action=>'removekos', result=>'1'});
+
+        foreach my $user ( SkyNet::User::users() ) {
+        if ($user->{allowed}{seestat}){
+            $user->skynet_msg($data->{name}."'s KOS has been removed by ".$sender->{name}."!");
+        }
+    }
 }
 
 sub getTimeStr {
