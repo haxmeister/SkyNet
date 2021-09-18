@@ -575,18 +575,18 @@ sub removekos{
 }
 
 sub addally{
-    my $caller = shift;
+     my $caller = shift;
     my $data   = shift;
     my $sender = shift;
     my $now    = time(); 
     my %res = (
-        'action'=>"addpayment", 
+        'action'=>"addally", 
         'name'  =>$data->{name}
     );
 
     #check permissions
     if (! $sender->{allowed}{manstat}){
-        $sender->respond({action=>'addally', result=>'0',error => "Not authorized to manage statuses.."});
+        $sender->respond({action=>'addlps', result=>'0',error => "Not authorized to manage statuses.."});
         return;
     }
 
@@ -632,7 +632,7 @@ sub addally{
         if ($user->{allowed}{seestat}){
             $user->skynet_msg($data->{name}." has been labeled ALLY by ".$sender->{name}."!");
         }
-    }
+    } 
 
 }
 
