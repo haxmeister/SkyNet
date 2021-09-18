@@ -555,7 +555,7 @@ sub removekos{
     my $sender = shift;
  
     #check permissions
-    if (! $sender->{allowed}{manwstat}){
+    if (! $sender->{allowed}{manstat}){
         $sender->respond({action=>'removekos', result=>'0',error => "Not authorized to manage statuses.."});
         return;
     }
