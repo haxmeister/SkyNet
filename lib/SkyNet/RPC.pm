@@ -192,7 +192,7 @@ sub list{
     my %res = (
         'action' => 'showlist',
         'result' => 1,
-        'list'   => 0,
+        'list'   => [],
     );
     my $sth = $sender->{db}->prepare("SELECT * FROM playerlist ORDER BY type, name");
     $sth->execute();
