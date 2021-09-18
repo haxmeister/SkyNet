@@ -507,7 +507,7 @@ sub addkos{
     my @match = $data->{length} =~ /^(\d+)([dhm]?)$/;
     if(! @match){
         $res{'result'} = 0;
-        $res{'msg'}  = "Invalid time period parameter.";
+        $res{'error'}  = "Invalid time period parameter.";
     }else{
         my $length = $match[0];
         my $interval = $match[1];
