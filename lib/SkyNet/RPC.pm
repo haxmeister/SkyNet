@@ -574,6 +574,68 @@ sub removekos{
     }
 }
 
+sub addally{
+    my $caller = shift;
+    my $data   = shift;
+    my $sender = shift;
+    my $now    = time(); 
+    my %res = (
+        'action'=>"addpayment", 
+        'name'  =>$data->{name}
+    );
+
+    #check permissions
+    if (! $sender->{allowed}{manstat}){
+        $sender->respond({action=>'addally', result=>'0',error => "Not authorized to manage statuses.."});
+        return;
+    }
+
+    my @match = $data->{length} =~ /^(\d+)([dhm]?)$/;
+    if(! @match){
+        $res{'result'} = 0;
+        $res{'msg'}  = "Invalid time period parameter.";
+    }else{
+        my $length = $match[0];
+        my $interval = $match[1];
+
+        if ($interval eq 'd'){
+            $length  *= 86400;
+        }elsif($interval eq 'h'){
+            $length *= 3600;
+        }else{
+            $length *= 60;
+        }
+
+        # remove previous entry (per yt)
+        my $sql = "DELETE FROM playerlist WHERE name=?";
+        my $sth = $sender->{db}->prepare($sql);
+        $sth->execute($data->{name});
+        $sth->finish();
+
+        $sql = "INSERT INTO playerlist (type, ts, name, length, addedby, notes) VALUES(?,?,?,?,?,?)";
+        $sth = $sender->{db}->prepare($sql);
+        $sth->execute(
+            2, 
+            $now, 
+            $data->{name}, 
+            $length, 
+            $sender->{name},
+            $data->{notes},
+        );
+        $sth->finish();
+
+        $res{result} = 1;
+    }
+    $sender->respond(\%res);
+
+    foreach my $user ( SkyNet::User::users() ) {
+        if ($user->{allowed}{seestat}){
+            $user->skynet_msg($data->{name}." has been labeled ALLY by ".$sender->{name}."!");
+        }
+    }
+
+}
+
 sub getTimeStr {
     my $secs = shift;
     if ($secs<0) {
