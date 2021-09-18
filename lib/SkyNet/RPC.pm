@@ -222,13 +222,13 @@ sub list{
         }
         
         
-        push(@{$res{list}}, (
+        push(@{$res{list}}, {
             'status'   => $row->{type},
             'name'     => $row->{name},
             'addedby'  => $row->{addedby},
             'remaining'=> $remaining,
             'notes'    => $row->{notes},
-        ));
+    });
     }
     $sth->finish();
 
