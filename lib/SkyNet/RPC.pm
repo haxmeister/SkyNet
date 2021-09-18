@@ -162,7 +162,7 @@ sub playerstatus {
                     $sth = $sender->{db}->prepare("DELETE FROM playerlist WHERE id=?");
                     $sth->execute($row->{'id'});
                 } else {
-                    $status = 'Paid - remaining: ' . $caller->getTimeStr($remaining);
+                    $status = 'Paid - remaining: ' . getTimeStr($remaining);
                     $statustype = 2;
                 }
             }
@@ -211,12 +211,10 @@ sub list{
         
         if($row->{type} eq 0){
             $row->{type} = "PAID";
-            print STDERR "sending to gettimestring ($row->{length} - ($now - $row->{ts})\n";
             $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
         }
         elsif($row->{type} eq 1){
             $row->{type} = "KOS";
-            print STDERR "sending to gettimestring ($row->{length} - ($now - $row->{ts})\n";
             $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
         }
         elsif($row->{type} eq 2){
@@ -250,7 +248,6 @@ sub listkos{}
 sub listallies{}
 
 sub getTimeStr {
-    my $caller = shift;
     my $secs = shift;
     if ($secs<0) {
             return "--";
