@@ -419,6 +419,7 @@ sub addpayment{
         return;
     }
     my @match = $data->{length} =~ /^(\d+)([dhm]?)$/;
+
     if(! @match){
         $res{'result'} = 0;
         $res{'msg'}  = "Invalid time period parameter.";
@@ -446,7 +447,7 @@ sub addpayment{
             0, 
             $now, 
             $data->{name}, 
-            $data->{len}, 
+            $length, 
             $data->{addedby},
         );
         $sth->finish();
