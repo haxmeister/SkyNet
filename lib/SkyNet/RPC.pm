@@ -82,17 +82,9 @@ sub sn_adduser{
 
     if ($sender->{allowed}{manuser}){
         # check if user is already present
-        $sql = "select * from users where username='".$data->{username}."'";
+        $sql = "delete from users where username='".$data->{username}."'";
         my $sth = $sender->{db}->prepare($sql);
         $sth->execute();
-        if (my $row = $sth->fetchrow_hashref()){
-            $msg = '{"action":"adduser","result":0,"error":"User already exists"}';
-            print STDERR "user already exists\n sending: $msg\n";
-            print {$sender->{fh}} $msg."\r\n";
-            $sth->finish();
-            return;
-        }
-
         $sth->finish();
 
         $sql = "INSERT INTO users (username, password, seespots, seechat, manuser, manwarr, manstat, seestat, seewarr, addbot) VALUES(?,?,?,?,?,?,?,?,?,?)";
@@ -115,6 +107,25 @@ sub sn_adduser{
         my $msg = '{"action":"adduser","result":0,"msg":"Not authorized to manage users"}';
         print {$sender->{fh}} $msg;
     }
+}
+
+sub removeuser{
+    my $caller = shift;
+    my $data   = shift;
+    my $sender = shift;
+    my $sql;
+    my $msg;
+
+    if ($sender->{allowed}{manuser}){
+        # check if user is already present
+        $sql = "delete from users where username='".$data->{username}."'";
+        my $sth = $sender->{db}->prepare($sql);
+        $sth->execute();
+        $sth->finish();
+    }else{
+        my $msg = '{"action":"removeuser","result":0,"msg":"Not authorized to manage users"}';
+        print {$sender->{fh}} $msg;
+    }   
 }
 
 sub logout {
@@ -637,7 +648,7 @@ sub removeally{
 
     foreach my $user ( SkyNet::User::users() ) {
         if ($user->{allowed}{seestat}){
-            $user->skynet_msg($data->{name}."'s ALLy has been removed by ".$sender->{name}."!");
+            $user->skynet_msg($data->{name}."'s ALLY status has been removed by ".$sender->{name}."!");
         }
     }
 
