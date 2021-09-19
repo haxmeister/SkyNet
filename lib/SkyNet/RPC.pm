@@ -617,6 +617,32 @@ sub addally{
 
 }
 
+sub removeally{
+    my $caller = shift;
+    my $data   = shift;
+    my $sender = shift;
+ 
+    #check permissions
+    if (! $sender->{allowed}{manstat}){
+        $sender->respond({action=>'removeally', result=>'0',error => "Not authorized to manage statuses.."});
+        return;
+    }
+
+    my $sql = "DELETE FROM playerlist WHERE name=?";
+    my $sth = $sender->{db}->prepare($sql);
+    $sth->execute($data->{name});
+    $sth->finish();
+
+    $sender->respond({action=>'removeally', result=>'1'});
+
+    foreach my $user ( SkyNet::User::users() ) {
+        if ($user->{allowed}{seestat}){
+            $user->skynet_msg($data->{name}."'s ALLy has been removed by ".$sender->{name}."!");
+        }
+    }
+
+}
+
 sub getTimeStr {
     my $secs = shift;
     if ($secs<0) {
