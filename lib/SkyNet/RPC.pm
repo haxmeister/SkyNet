@@ -101,8 +101,9 @@ sub sn_adduser{
                 $data->{seewarr}, # see warranties
                 $data->{addbot},  # add bots
             );
-            $sth->finish();
-            $sender->{db}->commit or print STDERR $DBI::errstr;
+        $sth->finish();
+        $sender->{db}->commit or print STDERR $DBI::errstr;
+        $sender->skynet_msg($data->{name}." has been added to Skynet");
     }else{
         my $msg = '{"action":"adduser","result":0,"msg":"Not authorized to manage users"}';
         print {$sender->{fh}} $msg;
@@ -122,6 +123,7 @@ sub removeuser{
         my $sth = $sender->{db}->prepare($sql);
         $sth->execute();
         $sth->finish();
+        $sender->{db}->commit or print STDERR $DBI::errstr;
     }else{
         my $msg = '{"action":"removeuser","result":0,"msg":"Not authorized to manage users"}';
         print {$sender->{fh}} $msg;
@@ -462,7 +464,7 @@ sub addpayment{
             $data->{addedby},
         );
         $sth->finish();
-
+        $sender->{db}->commit or print STDERR $DBI::errstr;
         $res{result} = 1;
     }
     $sender->respond(\%res);
@@ -489,7 +491,7 @@ sub removepayment{
     my $sth = $sender->{db}->prepare($sql);
     $sth->execute($data->{name});
     $sth->finish();
-
+    $sender->{db}->commit or print STDERR $DBI::errstr;
     $sender->respond({action=>'removepayment', result=>'1'});
 
         foreach my $user ( SkyNet::User::users() ) {
@@ -536,6 +538,7 @@ sub addkos{
         my $sth = $sender->{db}->prepare($sql);
         $sth->execute($data->{name});
         $sth->finish();
+        $sender->{db}->commit or print STDERR $DBI::errstr;
 
         $sql = "INSERT INTO playerlist (type, ts, name, length, addedby, notes) VALUES(?,?,?,?,?,?)";
         $sth = $sender->{db}->prepare($sql);
@@ -548,6 +551,7 @@ sub addkos{
             $data->{notes},
         );
         $sth->finish();
+        $sender->{db}->commit or print STDERR $DBI::errstr;
 
         $res{result} = 1;
     }
@@ -575,6 +579,7 @@ sub removekos{
     my $sth = $sender->{db}->prepare($sql);
     $sth->execute($data->{name});
     $sth->finish();
+    $sender->{db}->commit or print STDERR $DBI::errstr;
 
     $sender->respond({action=>'removekos', result=>'1'});
 
@@ -606,6 +611,7 @@ sub addally{
     my $sth = $sender->{db}->prepare($sql);
     $sth->execute($data->{name});
     $sth->finish();
+    $sender->{db}->commit or print STDERR $DBI::errstr;
 
     $sql = "INSERT INTO playerlist (type, ts, name, addedby) VALUES(?,?,?,?)";
     $sth = $sender->{db}->prepare($sql);
@@ -616,6 +622,7 @@ sub addally{
         $sender->{name},
     );
     $sth->finish();
+    $sender->{db}->commit or print STDERR $DBI::errstr;
 
     $res{result} = 1;
     $sender->respond(\%res);
@@ -643,7 +650,8 @@ sub removeally{
     my $sth = $sender->{db}->prepare($sql);
     $sth->execute($data->{name});
     $sth->finish();
-
+    $sender->{db}->commit or print STDERR $DBI::errstr;
+    
     $sender->respond({action=>'removeally', result=>'1'});
 
     foreach my $user ( SkyNet::User::users() ) {
