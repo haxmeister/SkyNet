@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use IO::Socket;
 use IO::Multiplex;
-Term::ANSIColor;
+use Term::ANSIColor;
 use DBI;
 use SkyNet::User;
 use SkyNet::RPC;
