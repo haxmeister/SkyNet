@@ -57,11 +57,11 @@ sub mux_close {
 
     # User disconnected;
     $self->{server}->log_this("User ".$self->{name}." disconnected..");
-    
+    delete $users{$self};
     # notify others of logoff
     $self->skynet_msg_all($self->{name}." departed..");
     
-    delete $users{$self};
+    
 }
 
 sub process_command {
