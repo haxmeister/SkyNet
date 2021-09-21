@@ -25,6 +25,8 @@ sub auth {
     my $caller = shift;
     my $data   = shift;
     my $sender = shift;
+
+    $sender->{server}->DBconnect();
     my @result_list;
     my $sql = "SELECT * from users where username = ? and password = ?";
     my $sth = $sender->{db}->prepare($sql);
@@ -81,7 +83,7 @@ sub sn_adduser{
     my $msg;
 
     if ($sender->{allowed}{manuser}){
-        # check if user is already present
+        $sender->{server}->DBconnect();
         $sql = "delete from users where username='".$data->{username}."'";
         my $sth = $sender->{db}->prepare($sql);
         $sth->execute();
@@ -118,7 +120,7 @@ sub removeuser{
     my $msg;
 
     if ($sender->{allowed}{manuser}){
-        # check if user is already present
+        $sender->{server}->DBconnect();
         $sql = "delete from users where username='".$data->{username}."'";
         my $sth = $sender->{db}->prepare($sql);
         $sth->execute();
@@ -151,7 +153,8 @@ sub playerstatus {
     if (! $sender->{allowed}{seestat}){
         return;
     }
-    print STDERR "Status check..\n";
+    $sender->{server}->log_this("Status check..");
+    $sender->{server}->DBconnect();
     my $sth = $sender->{db}->prepare("SELECT * FROM playerlist WHERE name = ?");
     $sth->execute($data->{name});
     my $row = $sth->fetchrow_hashref();
@@ -210,6 +213,7 @@ sub list{
         'result' => 1,
         'list'   => [],
     );
+    $sender->{server}->DBconnect();
     my $sth = $sender->{db}->prepare("SELECT * FROM playerlist ORDER BY type, name");
     $sth->execute();
     
@@ -245,7 +249,7 @@ sub list{
 
     if ($res{list}){
         $sender->respond(\%res);
-        print STDERR "list is not empty\n";
+        $sender->{server}->log_this("list is not empty");
     }
     else{
         $sender->respond({
@@ -253,7 +257,7 @@ sub list{
             'result' => 0,
             'error'  => "list is empty..",
         });
-        print STDERR "list is empty\n";
+        $sender->{server}->log_this("list is empty");
     }
 }
 
@@ -275,6 +279,7 @@ sub listpayment{
     }
 
     # prepare query
+    $sender->{server}->DBconnect();
     my $sth = $sender->{db}->prepare("SELECT * FROM playerlist WHERE type=0 ORDER BY name");
     $sth->execute();
     
@@ -328,6 +333,7 @@ sub listkos{
     }
 
     # prepare query
+    $sender->{server}->DBconnect();
     my $sth = $sender->{db}->prepare("SELECT * FROM playerlist WHERE type=1 ORDER BY name");
     $sth->execute();
     
@@ -351,7 +357,7 @@ sub listkos{
 
     if ($res{list}){
         $sender->respond(\%res);
-        print STDERR "list is not empty\n";
+        $sender->{server}->log_this("list is not empty");
     }
     else{
         $sender->respond({
@@ -359,7 +365,7 @@ sub listkos{
             'result' => 0,
             'error'  => "list is empty..",
         });
-        print STDERR "list is empty\n";
+        $sender->{server}->log_this("list is empty");
     }   
 }
 
@@ -381,6 +387,7 @@ sub listallies{
     }
 
     # prepare query
+    $sender->{server}->DBconnect();
     my $sth = $sender->{db}->prepare("SELECT * FROM playerlist WHERE type=2 ORDER BY name");
     $sth->execute();
     
@@ -390,7 +397,6 @@ sub listallies{
                    
         $row->{type} = "ALLY";
         $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
-        
         
         push(@{$res{list}}, {
             'status'   => $row->{type},
@@ -404,7 +410,7 @@ sub listallies{
 
     if ($res{list}){
         $sender->respond(\%res);
-        print STDERR "list is not empty\n";
+        $sender->{server}->log_this("list is not empty");
     }
     else{
         $sender->respond({
@@ -412,7 +418,7 @@ sub listallies{
             'result' => 0,
             'error'  => "list is empty..",
         });
-        print STDERR "list is empty\n";
+        $sender->{server}->log_this("list is empty");
     }   
 }
 
@@ -449,6 +455,7 @@ sub addpayment{
         }
 
         # remove previous entry (per yt)
+        $sender->{server}->DBconnect();
         my $sql = "DELETE FROM playerlist WHERE name=?";
         my $sth = $sender->{db}->prepare($sql);
         $sth->execute($data->{name});
@@ -464,7 +471,6 @@ sub addpayment{
             $data->{addedby},
         );
         $sth->finish();
-        $sender->{db}->commit or print STDERR $DBI::errstr;
         $res{result} = 1;
     }
     $sender->respond(\%res);
@@ -486,12 +492,11 @@ sub removepayment{
         $sender->respond({action=>'removepayment', result=>'0',error => "Not authorized to manage warranties.."});
         return;
     }
-
+    $sender->{server}->DBconnect();
     my $sql = "DELETE FROM playerlist WHERE name=?";
     my $sth = $sender->{db}->prepare($sql);
     $sth->execute($data->{name});
     $sth->finish();
-    $sender->{db}->commit or print STDERR $DBI::errstr;
     $sender->respond({action=>'removepayment', result=>'1'});
 
         foreach my $user ( SkyNet::User::users() ) {
@@ -533,7 +538,8 @@ sub addkos{
             $length *= 60;
         }
 
-        # remove previous entry (per yt)
+        
+        $sender->{server}->DBconnect();
         my $sql = "DELETE FROM playerlist WHERE name=?";
         my $sth = $sender->{db}->prepare($sql);
         $sth->execute($data->{name});
@@ -551,8 +557,6 @@ sub addkos{
             $data->{notes},
         );
         $sth->finish();
-        $sender->{db}->commit or print STDERR $DBI::errstr;
-
         $res{result} = 1;
     }
     $sender->respond(\%res);
@@ -574,13 +578,11 @@ sub removekos{
         $sender->respond({action=>'removekos', result=>'0',error => "Not authorized to manage statuses.."});
         return;
     }
-
+    $sender->{server}->DBconnect();
     my $sql = "DELETE FROM playerlist WHERE name=?";
     my $sth = $sender->{db}->prepare($sql);
     $sth->execute($data->{name});
     $sth->finish();
-    $sender->{db}->commit or print STDERR $DBI::errstr;
-
     $sender->respond({action=>'removekos', result=>'1'});
 
     foreach my $user ( SkyNet::User::users() ) {
@@ -606,7 +608,7 @@ sub addally{
         return;
     }
 
-    # remove previous entry (per yt)
+    $sender->{server}->DBconnect();
     my $sql = "DELETE FROM playerlist WHERE name=?";
     my $sth = $sender->{db}->prepare($sql);
     $sth->execute($data->{name});
@@ -645,12 +647,11 @@ sub removeally{
         $sender->respond({action=>'removeally', result=>'0',error => "Not authorized to manage statuses.."});
         return;
     }
-
+    $sender->{server}->DBconnect();
     my $sql = "DELETE FROM playerlist WHERE name=?";
     my $sth = $sender->{db}->prepare($sql);
     $sth->execute($data->{name});
     $sth->finish();
-    $sender->{db}->commit or print STDERR $DBI::errstr;
     
     $sender->respond({action=>'removeally', result=>'1'});
 

@@ -14,6 +14,7 @@ sub new {
         'mux'     => $args{mux},
         'fh'      => $args{fh},
         'db'      => $args{db},
+        'server'  => $args{server},
         'name'    => 'unlogged-user',
         'loggedIn'=> 0,
         'allowed' => {
@@ -31,7 +32,7 @@ sub new {
     # Register the new User object as the callback specifically for
     # this file handle.
     $self->{mux}->set_callback_object( $self, $self->{fh} );
-    print STDERR "New user connected..\n";
+    $self->{server}->log_this("New user connected..");
 
     # Register this User object in the main list of Users
     $users{$self} = $self;
@@ -84,7 +85,7 @@ sub process_command {
         }
         else{
             # actions with no rpc get the json dumped to stderr
-            print STDERR "\n\n" . encode_json($data) . "\n\n";
+            $self->{server}->log_this("\n\n" . encode_json($data) . "\n\n");
         }
     }
 }
@@ -108,7 +109,7 @@ sub skynet_msg{
     my $msg = encode_json($data);
 
     if ($self->{loggedIn}){
-        print STDERR "sending $msg to ".$self->{name}."\n";
+        $self->{server}->log_this( "sending $msg to ".$self->{name});
         print $fh "$msg\r\n";
     }
 
@@ -162,27 +163,6 @@ sub announce_broadcast{
         my $msg = encode_json($data);
         print {$user->{fh}} "$msg\r\n" unless $user eq $self;
     }
-}
-
-## accepts a string and outputs it to STDERR with nice colored format
-## and a time stamp
-sub log_this {
-    my $self = shift;
-    my $line = shift;
-    print color('grey10');
-    print STDERR $self->timestamp();
-    print color('white');
-    print " $line \n";
-    print color('reset');
-}
-
-sub timestamp {
-    my @months = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
-    my @days   = qw(Sun Mon Tue Wed Thu Fri Sat Sun);
-    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = localtime();
-    my $month = $mon + 1;
-    $year = $year + 1900;
-    return "[$month/$mday/$year $hour:$min:$sec]";
 }
 
 1;

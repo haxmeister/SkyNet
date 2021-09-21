@@ -13,16 +13,12 @@ sub new {
     my %args  = @_;
     my $self  = {
         'mux' => IO::Multiplex->new(),
+        'db_username' => $args{db_username},
+        'db_password' => $args{db_password},
     };
+    bless $self, $class;   
 
-    $self->{db} = DBI->connect(
-        'dbi:mysql:famytools',
-        $args{db_username},
-        $args{db_password},
-        { RaiseError => 1, AutoCommit => 0 },
-    ) or die $DBI::errstr;
-
-    bless $self, $class;
+    DBconnect();
     return $self;
 }
 
@@ -37,6 +33,7 @@ sub listen_on_port{
         ReusePort => 1,
         Blocking  => 0,
     ) || die "cannot create socket $!";
+
     print "Listening on port $port..\n";
     # setup multiplexer to watch server socket for events
     $self->{mux}->listen($socket);
@@ -62,7 +59,18 @@ sub mux_connection {
             'mux'    => $mux,
             'fh'     => $fh,
             'db'     => $self->{db},
+            'server' => $self,
     );
+}
+
+sub DBconnect {
+    my $self = shift;
+    $self->{db} = DBI->connect_cached(
+        'dbi:mysql:famytools',
+        $self->{db_username},
+        $self->{db_password},
+        { RaiseError => 1, AutoCommit => 1 },
+    ) or die $self->log_this($DBI::errstr);
 }
 ## accepts a string and outputs it to STDERR with nice colored format
 ## and a time stamp
