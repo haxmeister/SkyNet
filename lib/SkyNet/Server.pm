@@ -18,7 +18,7 @@ sub new {
     };
     bless $self, $class;   
 
-    DBconnect();
+    $self->DBconnect();
     return $self;
 }
 
