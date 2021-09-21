@@ -13,8 +13,8 @@ sub new {
     my %args  = @_;
     my $self  = {
         'mux' => IO::Multiplex->new(),
-        'db_username' => $args{db_username},
-        'db_password' => $args{db_password},
+        'db_username' => 'skynet',
+        'db_password' => 'skynet2021',
     };
     bless $self, $class;   
 
