@@ -70,7 +70,11 @@ sub DBconnect {
         'dbi:mysql:famytools',
         $self->{db_username},
         $self->{db_password},
-        { RaiseError => 1, AutoCommit => 1 },
+        { 
+            RaiseError => 1, 
+            AutoCommit => 1,
+            mysql_auto_reconnect => 1,
+        },
     ) or die $self->log_this($DBI::errstr);
 }
 ## accepts a string and outputs it to STDERR with nice colored format
