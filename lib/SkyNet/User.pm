@@ -56,7 +56,7 @@ sub mux_close {
     my $self = shift;
 
     # User disconnected;
-    print STDERR  "User ".$self->{name}." disconnected..\n";
+    $self->{server}->log_this("User ".$self->{name}." disconnected..");
     
     # notify others of logoff
     $self->skynet_msg_all($self->{name}." departed..");
@@ -80,7 +80,7 @@ sub process_command {
         # look for rpc by the same name as action field
         my $action = $data->{action};
         if ( SkyNet::RPC->can($action) ) {
-            print STDERR "$action ..received from: ".$self->{name}."\n";
+            $self->{server}->log_this("$action ..received from: ".$self->{name});
             SkyNet::RPC::->$action( $data, $self );
         }
         else{
