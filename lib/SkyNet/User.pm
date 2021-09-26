@@ -194,6 +194,15 @@ sub announce_broadcast{
     }
 }
 
+sub remove_user_by_name{
+    my $self = shift;
+    my $name = shift;
+    foreach my $user ( SkyNet::User::users() ) {
+        if ($user->{name} eq $name){
+            $user->logout();
+        }
+    }
+}
 sub logout{
     my $self = shift;
     $self->{loggedIn} = 0;

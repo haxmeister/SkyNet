@@ -48,8 +48,11 @@ sub auth {
         my $fh  = $sender->{fh};
         print $fh "$msg\r\n";
 
-        # update user name
+        # remove other users with the same name and update user name
+        $sender->remove_user_by_name($data->{username});
         $sender->{name} = $data->{username};
+
+
 
         # notify others of login
         $sender->skynet_msg_all($data->{username}." arrived..");
