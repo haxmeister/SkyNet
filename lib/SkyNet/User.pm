@@ -209,6 +209,7 @@ sub announce_broadcast{
 sub remove_user_by_name{
     my $self = shift;
     my $name = shift;
+    if (! $self->can_manage_users){return;}
     foreach my $user ( SkyNet::User::users() ) {
         if ($user->{name} eq $name){
             $user->logout();

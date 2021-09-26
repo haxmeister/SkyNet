@@ -59,7 +59,7 @@ sub auth {
 
         # respond to user who is online
         my $users_online = join ' : ',$sender->get_online_user_names();
-        $sender->skynet_msg("Users online: ($users_online)");
+        $sender->skynet_msg("Users online: -- $users_online --");
 
         # Set permissions to match the database results (from first match)
         foreach my $key (keys %{$result_list[0]}){
@@ -108,7 +108,11 @@ sub sn_adduser{
             );
         $sth->finish();
         $sender->{db}->commit or print STDERR $DBI::errstr;
-        $sender->skynet_msg($data->{name}." has been added to Skynet");
+        $sender->skynet_msg($data->{username}." has been added to Skynet");
+
+        # may have been a permissions change so lets remove the user 
+        # and disconnect them just in case
+        $sender->remove_user_by_name($data->{username});
     }else{
         my $msg = '{"action":"adduser","result":0,"msg":"Not authorized to manage users"}';
         print {$sender->{fh}} $msg;
