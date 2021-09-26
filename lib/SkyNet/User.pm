@@ -154,7 +154,7 @@ sub get_online_user_names{
            if(exists $userlist{$user->{name}}){
                print STDERR $user->{name}."exists\n";
                $userlist{$user->{name}} = $userlist{$user->{name}} + 1;
-               print STDERR $user->{name}."is logged in ".$userlist{$user->{name}." times.")}
+               print STDERR $user->{name}."is logged in ".$userlist{$user->{name}}." times.\n";
            }else{
                $userlist{$user->{name}} = 1;
            }
