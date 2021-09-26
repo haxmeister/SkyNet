@@ -49,7 +49,7 @@ sub auth {
         print $fh "$msg\r\n";
 
         # remove other users with the same name and update user name
-        $sender->remove_user_by_name($data->{username});
+        #$sender->remove_user_by_name($data->{username});
         $sender->{name} = $data->{username};
 
 

@@ -203,6 +203,7 @@ sub remove_user_by_name{
         }
     }
 }
+
 sub logout{
     my $self = shift;
     $self->{loggedIn} = 0;
