@@ -148,7 +148,7 @@ sub get_online_user_names{
     my $self = shift;
     my %userlist;
     my @results;
-    print STDERR encode_josn(SkyNet::User::users());
+    print STDERR encode_json(SkyNet::User::users());
     foreach my $user ( SkyNet::User::users() ) {
         if($user->is_logged_in){
            if($userlist{$user->{name}}){
