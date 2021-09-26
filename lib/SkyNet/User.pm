@@ -152,7 +152,7 @@ sub get_online_user_names{
     foreach my $user ( SkyNet::User::users() ) {
         if($user->is_logged_in){
            if(exists $userlist{$user->{name}}){
-               $userlist{$user->{name}}++;
+               $userlist{$user->{name}} = $userlist{$user->{name}} + 1;
            }else{
                $userlist{$user->{name}} = 1;
            }
