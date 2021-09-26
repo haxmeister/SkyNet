@@ -127,6 +127,14 @@ sub removeuser{
         $sth->finish();
         $sender->{db}->commit or print STDERR $DBI::errstr;
         $sender->announce_broadcast($data->{username}." has been removed.");
+
+        # look for and disconnect the removed user
+        foreach my $user ( SkyNet::User::users() ) {
+            if ($user->{name} eq $data->{username}){
+            $user->logout();
+        }
+    }
+
     }else{
         my $msg = '{"action":"removeuser","result":0,"msg":"Not authorized to manage users"}';
         print {$sender->{fh}} $msg;
