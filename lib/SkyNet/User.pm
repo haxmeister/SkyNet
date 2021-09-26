@@ -148,27 +148,23 @@ sub get_online_user_names{
     my $self = shift;
     my %userlist;
     my @results;
-
+    print STDERR encode_josn(SkyNet::User::users());
     foreach my $user ( SkyNet::User::users() ) {
         if($user->is_logged_in){
            if($userlist{$user->{name}}){
-               print STDERR $user->{name}."exists\n";
                $userlist{$user->{name}} = $userlist{$user->{name}} + 1;
-               print STDERR $user->{name}."is logged in ".$userlist{$user->{name}}." times.\n";
            }else{
                $userlist{$user->{name}} = 1;
            }
         }
     }
-    print STDERR encode_json(\%userlist);
 
     foreach my $name (keys %userlist){
         my $str = "$name(".$userlist{$name}.")";
-        print STDERR $str."\n";
         push (@results, "$name(".$userlist{$name}.")");
     }
 
-    return keys @results;
+    return @results;
 }
 
 # accepts a chat message object and sends
