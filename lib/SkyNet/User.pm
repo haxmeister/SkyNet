@@ -146,13 +146,13 @@ sub skynet_msg_all{
 
 sub get_online_user_names{
     my $self = shift;
-    my @userlist;
+    my %userlist;
     foreach my $user ( SkyNet::User::users() ) {
         if($user->is_logged_in){
-            push @userlist, $user->{name};
+           $userlist{$user->{name}} = 1 unless exists $userlist{$user->{name}};
         }
     }
-    return @userlist;
+    return keys %userlist;
 }
 
 # accepts a chat message object and sends
