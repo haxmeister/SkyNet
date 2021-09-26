@@ -160,7 +160,7 @@ sub get_online_user_names{
            }
         }
     }
-    print STDERR encode_json(%userlist);
+    print STDERR encode_json(\%userlist);
 
     foreach my $name (keys %userlist){
         my $str = "$name(".$userlist{$name}.")";
