@@ -164,6 +164,7 @@ sub get_online_user_names{
 
     foreach my $name (keys %userlist){
         my $str = "$name(".$userlist{$name}.")";
+        print STDERR $string."\n";
         push (@results, "$name(".$userlist{$name}.")");
     }
 
