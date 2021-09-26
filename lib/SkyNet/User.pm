@@ -151,9 +151,10 @@ sub get_online_user_names{
 
     foreach my $user ( SkyNet::User::users() ) {
         if($user->is_logged_in){
-            print STDERR $user->{name}."is logged in\n";
            if(exists $userlist{$user->{name}}){
+               print STDERR $user->{name}."exists\n";
                $userlist{$user->{name}} = $userlist{$user->{name}} + 1;
+               print STDERR $user->{name}."is logged in ".$userlist{$user->{name}." times.")}
            }else{
                $userlist{$user->{name}} = 1;
            }
