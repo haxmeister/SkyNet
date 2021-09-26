@@ -148,7 +148,9 @@ sub get_online_user_names{
     my $self = shift;
     my @userlist;
     foreach my $user ( SkyNet::User::users() ) {
-        push @userlist, $user->{name};
+        if($user->is_logged_in){}
+            push @userlist, $user->{name};
+    }
     }
     return @userlist;
 }
