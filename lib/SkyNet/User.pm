@@ -36,6 +36,9 @@ sub new {
 
     # Register this User object in the main list of Users
     $users{$self} = $self;
+
+    # set a timer callback for 10 seconds 
+    $self->{mux}->set_timeout($self->{fh}, 10);
 }
 
 sub users { return values %users; }
@@ -57,11 +60,25 @@ sub mux_close {
 
     # User disconnected;
     $self->{server}->log_this("User ".$self->{name}." disconnected..");
-    delete $users{$self};
-    # notify others of logoff
-    $self->skynet_msg_all($self->{name}." departed..");
+    delete $users{$self} if exists $users{$self};
+    # notify others of disconnect
+    $self->skynet_msg_all($self->{name}." disconnected..");
     
+}
+
+
+sub mux_timeout {
+    my $self = shift;
+    my $mux  = shift;
     
+    # unlogged users get dumped after 10 seconds
+    if (! $self->{loggedIn}){
+        delete $users{$self} if exists $users{$self};
+        $self->{mux}->remove($self->{fh});
+        $self->{mux}->close($self->{fh});
+    }
+    #$self->heartbeat;
+    #$mux->set_timeout($self->{fh}, 1);
 }
 
 sub process_command {
@@ -85,7 +102,7 @@ sub process_command {
         }
         else{
             # actions with no rpc get the json dumped to stderr
-            $self->{server}->log_this("\n\n" . encode_json($data) . "\n\n");
+            $self->{server}->log_this("\n command not found \n" . encode_json($data) . "\n\n");
         }
     }
 }
@@ -97,6 +114,8 @@ sub respond{
     print {$self->{fh}} encode_json($msg_data)."\r\n";
 }
 
+# accepts a string and sends as
+# server message to this user if logged in
 sub skynet_msg{
     my $self = shift;
     my $text = shift;
@@ -109,12 +128,14 @@ sub skynet_msg{
     my $msg = encode_json($data);
 
     if ($self->{loggedIn}){
-        $self->{server}->log_this( "sending $msg to ".$self->{name});
+        $self->{server}->log_this( "sending Skynet msg: $msg to ".$self->{name});
         print $fh "$msg\r\n";
     }
 
 }
 
+# accepts a string and sends as
+# server message to all logged in users
 sub skynet_msg_all{
     my $self = shift;
     my $text = shift;
@@ -132,14 +153,16 @@ sub get_online_user_names{
     return @userlist;
 }
 
+# accepts a chat message object and sends
+# to all users who can see chat and are logged in
 sub chat_broadcast{
     my $self = shift;
     my $data = shift;
     my $msg  = encode_json($data);
 
     foreach my $user ( SkyNet::User::users() ) {
-        if ($user->{allowed}{seechat}){
-            print {$user->{fh}} "$msg\r\n";# unless $user->{fh} eq $self->{fh};
+        if ($user->can_see_chat and $user->is_logged_in){
+            print {$user->{fh}} "$msg\r\n" unless $user eq $self;
         }
     }
 }
@@ -148,21 +171,79 @@ sub spot_broadcast{
     my $self = shift;
     my $data = shift;
     foreach my $user ( SkyNet::User::users() ) {
-        if ($user->{allowed}{seespots}){
+        if ($user->can_see_spots and $self->is_logged_in){
             my $msg = encode_json($data);
             print {$user->{fh}} "$msg\r\n" unless $user eq $self;
         }
     }
 }
 
+# accepts an announce message object and sends
+# to all users who are logged in
 sub announce_broadcast{
     my $self = shift;
     my $data = shift;
+    my $msg = encode_json($data);
 
     foreach my $user ( SkyNet::User::users() ) {
-        my $msg = encode_json($data);
-        print {$user->{fh}} "$msg\r\n" unless $user eq $self;
+        if ($user->is_logged_in){
+            print {$user->{fh}} "$msg\r\n" unless $user eq $self;
+        }
     }
+}
+
+sub logout{
+    my $self = shift;
+    $self->{loggedIn} = 0;
+    delete $users{$self} if exists $users{$self};
+    $self->{mux}->remove($self->{fh});
+    $self->{mux}->close($self->{fh});
+    $self->skynet_msg_all($self->{name}." logged out.");
+}
+
+sub is_logged_in{
+    my $self = shift;
+    return $self->{loggedIn};
+}
+
+sub can_see_chat{
+    my $self = shift;
+    return $self->{allowed}{seechat};
+}
+
+sub can_see_spots{
+    my $self = shift;
+    return $self->{allowed}{seespots};
+}
+
+sub can_manage_users{
+    my $self = shift;
+    return $self->{allowed}{manuser};
+}
+
+sub can_manage_warranties{
+    my $self = shift;
+    return $self->{allowed}{manwarr};
+}
+
+sub can_see_warranties{
+    my $self = shift;
+    return $self->{allowed}{seewarr};
+}
+
+sub can_manage_statuses{
+    my $self = shift;
+    return $self->{allowed}{manstat};
+}
+
+sub can_see_statuses{
+    my $self = shift;
+    return $self->{allowed}{seestat};
+}
+
+sub can_add_bots{
+    my $self = shift;
+    return $self->{allowed}{addbot};
 }
 
 1;

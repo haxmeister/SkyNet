@@ -119,13 +119,14 @@ sub removeuser{
     my $sql;
     my $msg;
 
-    if ($sender->{allowed}{manuser}){
+    if ($sender->can_manage_users){
         $sender->{server}->DBconnect();
-        $sql = "delete from users where username='".$data->{username}."'";
+        $sql = "delete from users where username=?";
         my $sth = $sender->{db}->prepare($sql);
-        $sth->execute();
+        $sth->execute($data->{username});
         $sth->finish();
         $sender->{db}->commit or print STDERR $DBI::errstr;
+        $sender->announce_broadcast($data->{username}." has been removed.");
     }else{
         my $msg = '{"action":"removeuser","result":0,"msg":"Not authorized to manage users"}';
         print {$sender->{fh}} $msg;
@@ -136,7 +137,8 @@ sub logout {
     my $caller = shift;
     my $data   = shift;
     my $sender = shift;
-    print STDERR "logout: " . encode_json($data)."\n";
+    print STDERR "logout: ". encode_json($data)."\n";
+    $sender->logout();    
 }
 
 sub playerstatus {
@@ -150,10 +152,10 @@ sub playerstatus {
     );
 
     # check user permissions
-    if (! $sender->{allowed}{seestat}){
+    if (! $sender->can_see_statuses){
         return;
     }
-    $sender->{server}->log_this("Status check..");
+    $sender->{server}->log_this($data->{name}."Status check..");
     $sender->{server}->DBconnect();
     my $sth = $sender->{db}->prepare("SELECT * FROM playerlist WHERE name = ?");
     $sth->execute($data->{name});
@@ -222,17 +224,17 @@ sub list{
         my $remaining = '--';
         
         if($row->{type} eq 0){
-            if (! $sender->{allowed}{seewarr}){next;}
+            if (! $sender->can_see_warranties){next;}
             $row->{type} = "PAID";
             $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
         }
         elsif($row->{type} eq 1){
-            if (! $sender->{allowed}{seestat}){next;}
+            if (! $sender->can_see_statuses){next;}
             $row->{type} = "KOS";
             $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
         }
         elsif($row->{type} eq 2){
-            if (! $sender->{allowed}{seestat}){next;}
+            if (! $sender->can_see_statuses){next;}
             $row->{type} = "ALLY";
         }
         
@@ -273,7 +275,7 @@ sub listpayment{
     );
 
     # check user permissions
-    if (! $sender->{allowed}{seestat}){
+    if (! $sender->can_see_warranties){
         $sender->respond({action=>'showlist', result=>'0',msg => "Not authorized to see status list.."});
         return;
     }
@@ -327,7 +329,7 @@ sub listkos{
     );
 
     # check user permissions
-    if (! $sender->{allowed}{seestat}){
+    if (! $sender->can_see_statuses){
         $sender->respond({action=>'showlist', result=>'0',msg => "Not authorized to see status list.."});
         return;
     }
@@ -381,7 +383,7 @@ sub listallies{
     );
 
     # check user permissions
-    if (! $sender->{allowed}{seestat}){
+    if (! $sender->can_see_statuses){
         $sender->respond({action=>'showlist', result=>'0',msg => "Not authorized to see status list.."});
         return;
     }
@@ -433,7 +435,7 @@ sub addpayment{
     );
 
     #check permissions
-    if (! $sender->{allowed}{manwarr}){
+    if (! $sender->can_manage_warranties){
         $sender->respond({action=>'addpayment', result=>'0',error => "Not authorized to manage warranties.."});
         return;
     }
@@ -488,7 +490,7 @@ sub removepayment{
     my $sender = shift;
  
     #check permissions
-    if (! $sender->{allowed}{manwarr}){
+    if (! $sender->can_manage_warranties){
         $sender->respond({action=>'removepayment', result=>'0',error => "Not authorized to manage warranties.."});
         return;
     }
@@ -500,7 +502,7 @@ sub removepayment{
     $sender->respond({action=>'removepayment', result=>'1'});
 
         foreach my $user ( SkyNet::User::users() ) {
-        if ($user->{allowed}{seewarr}){
+        if ($user->can_see_warranties){
             $user->skynet_msg($data->{name}."'s warranty has been removed by ".$sender->{name}."!");
         }
     }
@@ -517,7 +519,7 @@ sub addkos{
     );
 
     #check permissions
-    if (! $sender->{allowed}{manstat}){
+    if (! $sender->can_manage_statuses){
         $sender->respond({action=>'addkos', result=>'0',error => "Not authorized to manage statuses.."});
         return;
     }
@@ -562,7 +564,7 @@ sub addkos{
     $sender->respond(\%res);
 
     foreach my $user ( SkyNet::User::users() ) {
-        if ($user->{allowed}{seestat}){
+        if ($user->can_see_statuses){
             $user->skynet_msg($data->{name}." has been labeled KOS by ".$sender->{name}."!");
         }
     }
@@ -574,7 +576,7 @@ sub removekos{
     my $sender = shift;
  
     #check permissions
-    if (! $sender->{allowed}{manstat}){
+    if (! $sender->can_manage_statuses){
         $sender->respond({action=>'removekos', result=>'0',error => "Not authorized to manage statuses.."});
         return;
     }
@@ -586,14 +588,14 @@ sub removekos{
     $sender->respond({action=>'removekos', result=>'1'});
 
     foreach my $user ( SkyNet::User::users() ) {
-        if ($user->{allowed}{seestat}){
+        if ($user->can_see_statuses){
             $user->skynet_msg($data->{name}."'s KOS has been removed by ".$sender->{name}."!");
         }
     }
 }
 
 sub addally{
-     my $caller = shift;
+    my $caller = shift;
     my $data   = shift;
     my $sender = shift;
     my $now    = time(); 
@@ -603,7 +605,7 @@ sub addally{
     );
 
     #check permissions
-    if (! $sender->{allowed}{manstat}){
+    if (! $sender->can_manage_statuses){
         $sender->respond({action=>'addlps', result=>'0',error => "Not authorized to manage statuses.."});
         return;
     }
@@ -630,7 +632,7 @@ sub addally{
     $sender->respond(\%res);
 
     foreach my $user ( SkyNet::User::users() ) {
-        if ($user->{allowed}{seestat}){
+        if ($user->can_see_statuses){
             $user->skynet_msg($data->{name}." has been labeled ALLY by ".$sender->{name}."!");
         }
     } 
@@ -643,7 +645,7 @@ sub removeally{
     my $sender = shift;
  
     #check permissions
-    if (! $sender->{allowed}{manstat}){
+    if (! $sender->can_manage_statuses){
         $sender->respond({action=>'removeally', result=>'0',error => "Not authorized to manage statuses.."});
         return;
     }
@@ -656,7 +658,7 @@ sub removeally{
     $sender->respond({action=>'removeally', result=>'1'});
 
     foreach my $user ( SkyNet::User::users() ) {
-        if ($user->{allowed}{seestat}){
+        if ($user->can_see_statuses){
             $user->skynet_msg($data->{name}."'s ALLY status has been removed by ".$sender->{name}."!");
         }
     }
