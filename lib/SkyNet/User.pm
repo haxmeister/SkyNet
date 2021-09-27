@@ -176,7 +176,7 @@ sub chat_broadcast{
 
     foreach my $user ( SkyNet::User::users() ) {
         if ($user->can_see_chat and $user->is_logged_in){
-            print {$user->{fh}} "$msg\r\n" unless $user eq $self;
+            print {$user->{fh}} "$msg\r\n";# unless $user eq $self;
         }
     }
 }
