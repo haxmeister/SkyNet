@@ -243,6 +243,7 @@ sub list{
             if (! $sender->can_see_warranties){next;}
             $row->{type} = "PAID";
             $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
+            next if $remaining < 1;
         }
         elsif($row->{type} eq 1){
             if (! $sender->can_see_statuses){next;}
@@ -261,7 +262,7 @@ sub list{
             'addedby'  => $row->{addedby},
             'remaining'=> $remaining,
             'notes'    => $row->{notes},
-    }) unless ($remaining < 1) and ($row{type} == 0);
+    });
     }
     $sth->finish();
 
