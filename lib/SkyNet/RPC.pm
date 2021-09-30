@@ -242,8 +242,9 @@ sub list{
         if($row->{type} eq 0){
             if (! $sender->can_see_warranties){next;}
             $row->{type} = "PAID";
+            if (  ($row->{length} - ($now - $row->{ts})) < 1  ){next;}
             $remaining = getTimeStr($row->{length} - ($now - $row->{ts}));
-            next if $remaining < 1;
+            
         }
         elsif($row->{type} eq 1){
             if (! $sender->can_see_statuses){next;}
