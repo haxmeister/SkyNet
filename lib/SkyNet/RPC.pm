@@ -197,6 +197,7 @@ sub playerstatus {
                     $status = 'Payment expired!';
                     $sth = $sender->{db}->prepare("DELETE FROM playerlist WHERE id=?");
                     $sth->execute($row->{'id'});
+                    print STDERR "deleting ".$row->{id}."\n";
                 } else {
                     $status = 'Paid - remaining: ' . getTimeStr($remaining);
                     $statustype = 2;
