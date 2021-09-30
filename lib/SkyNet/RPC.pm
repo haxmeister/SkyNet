@@ -261,7 +261,7 @@ sub list{
             'addedby'  => $row->{addedby},
             'remaining'=> $remaining,
             'notes'    => $row->{notes},
-    }) unless $remaining < 1;
+    }) unless ($remaining < 1) and ($row{type} == 0);
     }
     $sth->finish();
 
