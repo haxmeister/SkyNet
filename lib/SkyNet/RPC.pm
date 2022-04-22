@@ -564,8 +564,7 @@ sub addkos{
         my $sth = $sender->{db}->prepare($sql);
         $sth->execute($data->{name});
         $sth->finish();
-        $sender->{db}->commit or print STDERR $DBI::errstr;
-
+        
         $sql = "INSERT INTO playerlist (type, ts, name, length, addedby, notes) VALUES(?,?,?,?,?,?)";
         $sth = $sender->{db}->prepare($sql);
         $sth->execute(
