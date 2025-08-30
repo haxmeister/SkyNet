@@ -1,102 +1,69 @@
-package SkyNet::Server;
+use v5.42;
+use experimental qw(class);
+no warnings 'experimental::class';
 
-use strict;
-use warnings;
-use IO::Socket;
-use IO::Multiplex;
-use Term::ANSIColor;
-use DBI;
+class SkyNet::Server v1.0.0;
+
+use IO::Async::Loop;
+use IO::Async::Listener;
 use SkyNet::User;
-use SkyNet::RPC;
+use SkyNet::Protocol::Stream;
+use SkyNet::DB;
+use DBI;
 
-sub new {
-    my $class = shift;
-    my %args  = @_;
-    my $self  = {
-        'mux' => IO::Multiplex->new(),
-        'db_username' => $args{db_username},
-        'db_password' => $args{db_password},
-    };
-    bless $self, $class;   
+field $port         :param;
+field $color_output :param //= '';
+field $loop         :reader;
+field $db           :reader;
+field %users        :reader;
 
-    $self->DBconnect();
-    return $self;
+ADJUST{
+    $loop = IO::Async::Loop->new();
+    $db   = SkyNet::DB->new(name => 'skynet');
 }
 
-sub listen_on_port{
-    my $self = shift;
-    my $port = shift;
-    my $socket = IO::Socket::INET->new(
-        Listen    => 5,
-        LocalAddr => '0.0.0.0',
-        LocalPort => $port,
-        Proto     => 'tcp',
-        ReusePort => 1,
-        Blocking  => 0,
-    ) || die "cannot create socket $!";
+method start{
+    $loop->listen(
+        service  => $port,
+        socktype => 'stream',
 
-    print "Listening on port $port..\n";
-    # setup multiplexer to watch server socket for events
-    $self->{mux}->listen($socket);
+        on_accept => sub{
+            my ($socket) = @_;
+            my $address = $socket->peerhost . ":" . $socket->peerport;
 
-    # set this package as a place to look for mux callbacks
-    $self->{mux}->set_callback_object($self);
-}
+            my $new_user = SkyNet::User->new(
+                server => $self,
+                socket => $socket,
+                name   => $address,
+            );
 
-sub loop{
-    my $self = shift;
-    #start select loop
-    $self->{mux}->loop;
-}
-
-# mux_connection is called when a new connection is accepted.
-sub mux_connection {
-    my $self = shift;
-    my $mux  = shift;
-    my $fh   = shift;
-
-    # Construct a new User object
-    SkyNet::User->new(
-            'mux'    => $mux,
-            'fh'     => $fh,
-            'db'     => $self->{db},
-            'server' => $self,
-    );
-}
-
-sub DBconnect {
-    my $self = shift;
-    $self->{db} = DBI->connect_cached(
-        'dbi:mysql:famytools',
-        $self->{db_username},
-        $self->{db_password},
-        { 
-            RaiseError => 1, 
-            AutoCommit => 1,
-            mysql_auto_reconnect => 1,
+            say "new user connected at $address";
+            $self->add_user($new_user);
         },
-    ) or die $self->log_this($DBI::errstr);
-}
-## accepts a string and outputs it to STDERR with nice colored format
-## and a time stamp
-sub log_this {
-    my $self = shift;
-    my $line = shift;
-    print color('grey10');
-    print STDERR $self->timestamp();
-    print color('white');
-    print " $line \n";
-    print color('reset');
+    )->get();
+
+    say "Listening on port ".$port;
+    $loop->run;
 }
 
-sub timestamp {
-    my $self   = shift;
-    my @months = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
-    my @days   = qw(Sun Mon Tue Wed Thu Fri Sat Sun);
-    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = localtime();
-    my $month = $mon + 1;
-    $year = $year + 1900;
-    return "[$month/$mday/$year $hour:$min:$sec]";
+method add_user($user){
+    $users{$user} = $user;
+    say "New user joined";
+    say scalar( keys %users )." users connected";
 }
 
-1;
+method del_user($user){
+    say $user->name." disconnected";
+    $user->dismiss();
+    delete $users{$user};
+    say scalar(keys %users)." users connected";
+}
+
+method broadcast($msg_ref, $permission){
+    foreach my $user (keys %users){
+        if($users{$user}->allowed->$permission){
+            $users{$user}->send($msg_ref);
+        }
+    }
+}
+
