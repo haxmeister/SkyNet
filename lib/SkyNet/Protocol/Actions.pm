@@ -20,6 +20,28 @@ method playerseen ($data){
     return 0; # nothing for the user to do
 }
 
+my method get_playerlist($type){
+    my $found = $db->list_status($type);
+    my @list;
+    my $now = time();
+
+    foreach my $row (@$found){
+        my $remaining = '--';
+        $row->{type}  = $type;
+        $remaining    = getTimeStr($row->{length} - ($now - $row->{ts}));
+
+        push(@list, {
+            'status'   => $row->{type},
+            'name'     => $row->{name},
+            'addedby'  => $row->{addedby},
+            'remaining'=> $remaining,
+            'notes'    => $row->{notes},
+        });
+    }
+
+    return \@list;
+}
+
 # chat channel message broadcasting
 method channel ($data) {
     my $res;
@@ -62,6 +84,7 @@ method auth ($data){
         $user->set_loggedIn(1);
         $res->{action} = "auth";
         $res->{result} = 1;
+        $server->broadcast_skynet_msg($data->{username}." has logged on..")
     }else{
         $res->{action} = "auth";
         $res->{result} = 0;
@@ -72,7 +95,6 @@ method auth ($data){
 
 # add new skynet user to the database
 method sn_adduser ($data) {
-    say "sn_adduser received";
     my $res;
 
     unless ( $user->allowed->manuser ){
@@ -97,7 +119,6 @@ method sn_adduser ($data) {
 
 # remove a user's access
 method removeuser ($data) {
-    say "removeuser received";
     my $res;
 
     unless ( $user->allowed->manuser ){
@@ -122,13 +143,11 @@ method removeuser ($data) {
 
 # logoff the user by deleting from user list and closing connection
 method logout ($data) {
-    say "logout received";
     $user->dismiss;
 }
 
 # get the warranty status of a player
 method playerstatus ($data) {
-    say "playerstatus check";
     my $res;
 
     unless ( $user->allowed->seestat ){
@@ -173,12 +192,11 @@ method playerstatus ($data) {
 # make an announcement to all users
 method announce ($data) {
     $data->{result} = 1;
-    $server->broadcast($data, "announce");
+    $server->broadcast($data, "seechat");
 }
 
 # return a list of all warranty statuses
 method list ($data) {
-    say "list received";
     my $res;
 
     unless ( $user->allowed->seestat ){
@@ -236,7 +254,6 @@ method list ($data) {
 
 # return a list of all players that have warranties
 method listpayment ($data) {
-    say "listpayment received";
     my $res;
 
     unless ( $user->allowed->seestat ){
@@ -262,7 +279,6 @@ method listpayment ($data) {
 
 # return a list off all players with KOS status
 method listkos ($data) {
-    say "listkos received";
     my $res;
 
     unless ( $user->allowed->seestat ){
@@ -272,7 +288,7 @@ method listkos ($data) {
         return $res;
     }
 
-    $res = $self->&get_playerlist("KOS");
+    $res->{list} = $self->&get_playerlist("KOS");
 
     if ( @{$res->{list}} ){
         $res->{action} = "showlist";
@@ -287,7 +303,6 @@ method listkos ($data) {
 
 # return a list of all players with ALLY status
 method listallies ($data) {
-    say "listallies received";
     my $res;
 
     unless ( $user->allowed->seestat ){
@@ -297,7 +312,7 @@ method listallies ($data) {
         return $res;
     }
 
-    $res = $self->&get_playerlist("ALLY");
+    $res->{list} = $self->&get_playerlist("ALLY");
 
     if ( @{$res->{list}} ){
         $res->{action} = "showlist";
@@ -311,11 +326,40 @@ method listallies ($data) {
 }
 
 method addpayment ($data) {
-    say "addpayment received";
+    my $res;
+    my @match = $data->{length} =~ /^(\d+)([dhm]?)$/;
+
+    if(! @match){
+        $res->{'result'} = 0;
+        $res->{'error'}  = "Invalid time period parameter.";
+    }else{
+        my $length = $match[0];
+        my $interval = $match[1];
+
+        if ($interval eq 'd'){
+            $length  *= 86400;
+        }elsif($interval eq 'h'){
+            $length *= 3600;
+        }else{
+            $length *= 60;
+        }
+        $data->{length} = $length;
+    }
+
+    if ( $db->add_payment($user->name, $data) ){
+        $res->{action} = "addpayment";
+        $res->{result} = 1;
+        $server->broadcast_skynet_msg($data->{name}." purchased a warranty from ".$user->name);
+    }else{
+        $res->{action} = "addpayment";
+        $res->{result} = 0;
+        $res->{error}  = "could not add warranty to db"
+    }
+
+    return $res;
 }
 
 method removepayment ($data) {
-    say "removepayment received";
     my $res;
 
     unless ( $user->allowed->manstat ){
@@ -337,7 +381,6 @@ method removepayment ($data) {
 }
 
 method addkos ($data) {
-    say "addkos received";
     my $res;
 
     unless ( $user->allowed->manstat ){
@@ -361,7 +404,6 @@ method addkos ($data) {
 }
 
 method removekos ($data) {
-    say "removekos recieved";
     my $res;
     unless ( $user->allowed->manstat ){
         $res->{action} = "removekos";
@@ -382,7 +424,6 @@ method removekos ($data) {
 }
 
 method addally ($data) {
-    say "addally received";
     my $res;
     my $now = time();
 
@@ -407,7 +448,6 @@ method addally ($data) {
 }
 
 method removeally ($data) {
-    say "removeally received";
     my $res;
     unless ( $user->allowed->manstat ){
         $res->{action} = "removeally";
@@ -429,29 +469,7 @@ method removeally ($data) {
 
 ### private methods
 
-my method get_playerlist($type){
-    my $found = $db->list_status($type);
-    my @list;
-    my $now = time();
 
-    foreach my $row (@$found){
-        my $remaining = '--';
-        $row->{type}  = $type;
-        $remaining    = getTimeStr($row->{length} - ($now - $row->{ts}));
-
-        push(@list, {
-            'status'   => $row->{type},
-            'name'     => $row->{name},
-            'addedby'  => $row->{addedby},
-            'remaining'=> $remaining,
-            'notes'    => $row->{notes},
-        });
-    }
-
-    return \@list;
-}
-
-my method set_status($name, $type){}
 
 sub getTimeStr($secs){
     if ($secs<0) {

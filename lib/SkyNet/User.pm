@@ -50,7 +50,6 @@ method on_msg($msg_hash){
 }
 
 method dismiss(){
-    $stream->close_now;
     $server->del_user($self);
 }
 

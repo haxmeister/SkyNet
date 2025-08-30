@@ -42,7 +42,6 @@ sub on_read ($self, $buffref, $eof){
 sub write ($self, $hash){
     my $msg = encode_json ( $hash );
     $msg = $msg."\r\n";
-    say "sending: ".$hash->{action};
     say $msg;
     $self->SUPER::write($msg);
 }

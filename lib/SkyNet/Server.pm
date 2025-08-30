@@ -38,7 +38,9 @@ method start{
             );
 
             say "new user connected at $address";
+            $self->broadcast_skynet_msg("Unlogged user has joined");
             $self->add_user($new_user);
+
         },
     )->get();
 
@@ -50,10 +52,12 @@ method add_user($user){
     $users{$user} = $user;
     say "New user joined";
     say scalar( keys %users )." users connected";
+    $self->broadcast_skynet_msg(scalar( keys %users )." users connected");
 }
 
 method del_user($user){
     say $user->name." disconnected";
+    $user->stream->close_now;
     delete $users{$user};
     say scalar(keys %users)." users connected";
 }
@@ -72,10 +76,6 @@ method broadcast_skynet_msg($msg){
         'msg'    => $msg,
         'result' => 1,
     };
-    foreach my $user (keys %users){
-        if($users{$user}->allowed->seestat){
-            $users{$user}->send($res);
-        }
-    }
+    $self->broadcast($res, 'seechat')
 }
 

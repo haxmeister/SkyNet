@@ -24,6 +24,7 @@ ADJUST{
     $dbh  = DBI->connect(
         "dbi:SQLite:dbname=dbname"."db","","",
         {
+            RaiseError => 1,
             AutoCommit => 1,
         },
     ) or die $DBI::errstr;
@@ -55,7 +56,7 @@ ADJUST{
             type INTEGER NOT NULL,
             ts INTEGER NOT NULL,
             name VARCHAR(50) PRIMARY KEY,
-            length INTEGER NOT NULL,
+            length INTEGER,
             addedby VARCHAR(50) NOT NULL,
             notes VARCHAR(50)
         );
@@ -157,6 +158,7 @@ method add_ally($user_name, $data ){
         $data->{name},
         $user_name,
     );
+
     return $sth->finish;
 }
 
@@ -192,6 +194,19 @@ method add_kos($user_name, $data){
         $data->{notes},
     );
     return $sth->finish;
+}
+
+method add_payment($user_name, $data){
+    my $now = time();
+    my $sth = $dbh->prepare("INSERT OR REPLACE INTO playerlist (type, ts, name, length, addedby) VALUES(?,?,?,?,?)");
+    $sth->execute(
+        0,
+        $now,
+        $data->{name},
+        $data->{length},
+        $user_name,
+    );
+    return $sth->finish();
 }
 
 sub getTimeStr {
