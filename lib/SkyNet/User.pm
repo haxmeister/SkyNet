@@ -8,11 +8,11 @@ use Util::H2O;
 use SkyNet::Protocol::Actions;
 
 field $server   :reader :param ;
-field $name     :reader :param;
+field $name     :reader :writer :param;
 field $socket   :param;
 field $stream   :reader;
 field $action   :reader;;
-field $loggedIn :reader;
+field $loggedIn :reader :writer;
 field $allowed  :reader;
 
 

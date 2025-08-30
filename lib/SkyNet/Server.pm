@@ -19,7 +19,7 @@ field %users        :reader;
 
 ADJUST{
     $loop = IO::Async::Loop->new();
-    $db   = SkyNet::DB->new(name => 'skynet');
+    $db   = SkyNet::DB->new(dbname => 'skynet');
 }
 
 method start{
@@ -54,7 +54,6 @@ method add_user($user){
 
 method del_user($user){
     say $user->name." disconnected";
-    $user->dismiss();
     delete $users{$user};
     say scalar(keys %users)." users connected";
 }
@@ -63,6 +62,19 @@ method broadcast($msg_ref, $permission){
     foreach my $user (keys %users){
         if($users{$user}->allowed->$permission){
             $users{$user}->send($msg_ref);
+        }
+    }
+}
+
+method broadcast_skynet_msg($msg){
+    my $res = {
+        'action' => 'skynetmessage',
+        'msg'    => $msg,
+        'result' => 1,
+    };
+    foreach my $user (keys %users){
+        if($users{$user}->allowed->seestat){
+            $users{$user}->send($res);
         }
     }
 }

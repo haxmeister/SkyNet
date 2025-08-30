@@ -22,6 +22,15 @@ method playerseen ($data){
 
 # chat channel message broadcasting
 method channel ($data) {
+    my $res;
+
+    unless ( $user->allowed->seechat ){
+        $res->{action} = 'channel';
+        $res->{result} = 0;
+        $res->{error}  = "Not authorized to use alliance chat!";
+        return $res;
+    }
+
     $data->{result} = 1;
     $server->broadcast($data, "seechat");
     return 0; # nothing for the user to do
@@ -338,6 +347,17 @@ method addkos ($data) {
         return $res;
     }
 
+    if( $db->add_kos($user->name, $data) ){
+        $res->{action} = "addkos";
+        $res->{result} = 1;
+        $server->broadcast_skynet_msg($data->{name}." has been labeled KOS by ".$user->name."!");
+    }else{
+        $res->{action} = "addkos";
+        $res->{result} = 0;
+        $res->{error}  = "Could not add KOS status";
+    }
+
+    return $res;
 }
 
 method removekos ($data) {
@@ -363,6 +383,27 @@ method removekos ($data) {
 
 method addally ($data) {
     say "addally received";
+    my $res;
+    my $now = time();
+
+    unless ( $user->allowed->manstat ){
+        $res->{action} = "addally";
+        $res->{result} = 0;
+        $res->{error}  = "You are not authorized to add ally status";
+        return $res;
+    }
+
+    if ( $db->add_ally( $user->name, $data) ){
+        $res->{action} = "addally";
+        $res->{result} = 1;
+        $server->broadcast_skynet_msg($data->{name}." has been labeled ALLY by ".$user->name."!");
+    }else{
+        $res->{action} = "addally";
+        $res->{result}   = 0;
+        $res->{error}    = "unable to add ALLY status";
+    }
+
+    return $res;
 }
 
 method removeally ($data) {

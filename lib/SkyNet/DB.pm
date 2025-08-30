@@ -6,7 +6,7 @@ class SkyNet::DB v1.0.0;
 use DBI;
 use Util::H2O;
 
-field $name :param;
+field $dbname :param;
 field $dbh :reader;
 field $lists;
 
@@ -22,7 +22,7 @@ ADJUST{
 # create and/or connect to sqlite database
 ADJUST{
     $dbh  = DBI->connect(
-        "dbi:SQLite:dbname=$name"."db","","",
+        "dbi:SQLite:dbname=dbname"."db","","",
         {
             AutoCommit => 1,
         },
@@ -52,7 +52,6 @@ ADJUST{
 
     my $playerlist_table = q{
         CREATE TABLE IF NOT EXISTS playerlist (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
             type INTEGER NOT NULL,
             ts INTEGER NOT NULL,
             name VARCHAR(50) PRIMARY KEY,
@@ -149,6 +148,51 @@ method list_status($type){
     return \@found;
 }
 
+method add_ally($user_name, $data ){
+    my $now = time();
+    my $sth = $dbh->prepare("INSERT OR REPLACE INTO playerlist (type, ts, name, addedby) VALUES(?,?,?,?)");
+    $sth->execute(
+        2,
+        $now,
+        $data->{name},
+        $user_name,
+    );
+    return $sth->finish;
+}
+
+method add_kos($user_name, $data){
+    my $res;
+    my $length;
+    my $now = time();
+    my @match = $data->{length} =~ /^(\d+)([dhm]?)$/;
+
+    if(! @match){
+        $res->{'result'} = 0;
+        $res->{'error'}  = "Invalid time period parameter.";
+    }else{
+        $length = $match[0];
+        my $interval = $match[1];
+
+        if ($interval eq 'd'){
+            $length  *= 86400;
+        }elsif($interval eq 'h'){
+            $length *= 3600;
+        }else{
+            $length *= 60;
+        }
+    }
+
+    my $sth = $dbh->prepare("INSERT OR REPLACE INTO playerlist (type, ts, name, length, addedby, notes) VALUES(?,?,?,?,?,?)");
+    $sth->execute(
+        1,
+        $now,
+        $data->{name},
+        $length,
+        $user_name,
+        $data->{notes},
+    );
+    return $sth->finish;
+}
 
 sub getTimeStr {
     my $secs = shift;
