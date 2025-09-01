@@ -13,9 +13,19 @@ sub new ($class, %params){
 }
 
 sub on_read ($self, $buffref, $eof){
+
+    unless ($$buffref =~ /(^\{)/ ){
+        say "webbrowser detected";
+
+        $self->close_now();
+        $$buffref = "";
+        $self->user->dismiss();
+        return;
+    }
+
     while( $$buffref =~ s/^(.*)\r\n// ) {
         my $msg_txt = $1;
-        say "Received a line: $msg_txt";
+        say "Received from ".$self->user->name." $msg_txt";
         my $msg_hash;
         try{
             $msg_hash = $json->decode($1);
@@ -42,7 +52,7 @@ sub on_read ($self, $buffref, $eof){
 sub write ($self, $hash){
     my $msg = encode_json ( $hash );
     $msg = $msg."\r\n";
-    say $msg;
+    say "sending to ".$self->user->name." $msg";
     $self->SUPER::write($msg);
 }
 

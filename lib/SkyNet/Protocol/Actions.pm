@@ -84,7 +84,9 @@ method auth ($data){
         $user->set_loggedIn(1);
         $res->{action} = "auth";
         $res->{result} = 1;
-        $server->broadcast_skynet_msg($data->{username}." has logged on..")
+        $server->broadcast_skynet_msg($data->{username}." has logged on..");
+        $server->broadcast_skynet_msg($server->users_loggedin." users logged in..");
+
     }else{
         $res->{action} = "auth";
         $res->{result} = 0;
@@ -143,6 +145,7 @@ method removeuser ($data) {
 
 # logoff the user by deleting from user list and closing connection
 method logout ($data) {
+    $server->broadcast_skynet_msg($user->name." logged off..");
     $user->dismiss;
 }
 

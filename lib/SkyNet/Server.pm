@@ -38,7 +38,6 @@ method start{
             );
 
             say "new user connected at $address";
-            $self->broadcast_skynet_msg("Unlogged user has joined");
             $self->add_user($new_user);
 
         },
@@ -52,7 +51,7 @@ method add_user($user){
     $users{$user} = $user;
     say "New user joined";
     say scalar( keys %users )." users connected";
-    $self->broadcast_skynet_msg(scalar( keys %users )." users connected");
+
 }
 
 method del_user($user){
@@ -60,6 +59,7 @@ method del_user($user){
     $user->stream->close_now;
     delete $users{$user};
     say scalar(keys %users)." users connected";
+    $self->broadcast_skynet_msg($self->users_loggedin." users logged in..");
 }
 
 method broadcast($msg_ref, $permission){
@@ -79,3 +79,12 @@ method broadcast_skynet_msg($msg){
     $self->broadcast($res, 'seechat')
 }
 
+method users_loggedin(){
+    my @list;
+    foreach my $user(keys %users){
+        if ($users{$user}->loggedIn){
+            push @list, $user;
+        }
+    }
+    return scalar @list;
+}
